@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { Navigate } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
 import AppHeader from "./header";
 import { useSelector } from "react-redux";
 
@@ -8,7 +8,11 @@ const PrivateLayout = () => {
   console.log("loginTokenRes", loginTokenRes);
   return (
     <>
-      {loginTokenRes ? (
+     <div className="private-pages">
+          <AppHeader />
+            <Outlet />
+        </div>
+      {/* {loginTokenRes ? (
         <div className="private-pages">
           <AppHeader />
           <div>
@@ -17,7 +21,7 @@ const PrivateLayout = () => {
         </div>
       ) : (
         <Navigate to="/" />
-      )}
+      )} */}
     </>
   );
 };

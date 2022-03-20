@@ -5,20 +5,25 @@ import PrivateLayout from "../layout/privateLayout";
 import Login from "../pages/Login";
 import Home from "../pages/Home";
 import AddUser from "../pages/AddUser";
-import Lead from "../pages/Lead";
-import AddBranch from "../pages/AddBranch";
+import Leads from "../pages/Leads";
+import AddLead from "../pages/AddLead";
 
+import AddBranch from "../pages/AddBranch";
+import "../../src/theme/assets/App.scss";
+import Register from "../pages/Login/register";
 const AppRouter = () => {
   return (
     <Routes>
       <Route path="/" element={<PublicLayout />}>
-        <Route path="/" element={<Login />} />
+        <Route exact path="/" element={<Login />} />
+        <Route exact path="/register" element={<Register />} />
       </Route>
       <Route path="/" element={<PrivateLayout />}>
-        <Route path="/dashboard" element={<Home />} />
+        <Route exact path="/dashboard" element={<Home />} />
         <Route path="/addUser" element={<AddUser />} />
-        <Route path="/lead" element={<Lead />} />
-        <Route path="/addbranch" element={<AddBranch />} />
+        <Route path="/Addlead" element={<AddLead />} />
+        <Route path="/leads" element={<Leads />} />
+        <Route path="/branch" element={<AddBranch />} />
       </Route>
     </Routes>
   );
