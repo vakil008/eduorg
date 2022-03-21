@@ -27,7 +27,7 @@ import Drawer from '@material-ui/core/Drawer';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import CloseIcon from '@material-ui/icons/Close';
-
+import UserService from "../../services/user.service";
 function createData(name, calories, fat, carbs, protein) {
   return { name, calories, fat, carbs, protein };
 }
@@ -228,6 +228,22 @@ function Leads() {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+
+  React.useEffect(() => {
+    // Update the document title using the browser API
+
+    const apicall=async() =>{
+      try {
+        const response = await UserService.Getuni()
+       
+        console.log(response);
+      } catch (error) {
+        console.log("status error",error);
+      }
+    }
+    apicall();
+  },[]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
