@@ -28,25 +28,365 @@ import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import CloseIcon from '@material-ui/icons/Close';
 import UserService from "../../services/user.service";
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
+import { withStyles } from '@material-ui/core/styles';
+
+
+
+
+const useStyles = theme=> ({
+  root: {
+    width: '100%',
+  },
+  paper: {
+    width: '100%',
+    marginBottom: theme.spacing(2),
+  },
+  table: {
+    minWidth: 750,
+  },
+  visuallyHidden: {
+    border: 0,
+    clip: 'rect(0 0 0 0)',
+    height: 1,
+    margin: -1,
+    overflow: 'hidden',
+    padding: 0,
+    position: 'absolute',
+    top: 20,
+    width: 1,
+  },
+});
+let rows= [];
+
+class Leadss extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      order:"asc",
+      orderBy:"calories",
+      selected:[],
+      page:0,
+      rowsPerPage:5,
+      top: false,
+      left: false,
+      bottom: false,
+      right: false,
+      allLead:[]
+    };
+  }
+
+  componentDidMount() {
+    this.getAlllead();
+  }
+
+   handleRequestSort = (event, property) => {
+    const {
+      orderBy,order
+    } = this.state;
+    const isAsc = orderBy === property && order === 'asc'; 
+    this.setState({
+      order:isAsc ? 'desc' : 'asc'
+    });
+    this.setState({
+      orderBy:property
+    });
+  };
+
+  getAlllead = async () => {
+    try {
+      const response = await UserService.GetAllLead();
+      console.log("response of ssssss", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            allLead: list,
+          });
+          rows=list;
+        }
+  
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+
+
+   handleSelectAllClick = (event) => {
+     const {allLead}= this.state;
+    if (event.target.checked) {
+      const newSelecteds = allLead.map((n) => n.name);
+   
+
+      this.setState({
+        setSelected:newSelecteds
+      });
+      return;
+    }
+    this.setState({ setSelected: []});
+  };
+
+
+   handleClick = (event, name) => {
+    const {
+      selected
+    } = this.state;
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    this.setState({
+      setSelected:newSelected
+    });  
+  };
+
+
+   handleChangePage = (event, newPage) => {
+    this.setState({ page: newPage});
+  };
+
+
+
+   handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: parseInt(event.target.value, 10)});
+   
+    this.setState({ page: 0});
+  };
+
+  
+
+    toggleDrawer = (anchor, open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    this.setState({ [anchor]: open });
+  
+  };
+
+  render() {
+    const { classes } = this.props;
+
+    const { rowsPerPage,page,selected,orderBy,order,allLead } = this.state;
+     const rows= allLead;
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, allLead.length - page * rowsPerPage);
+
+   const isSelected = (name) => this.state.selected.indexOf(name) !== -1;
+    const list = (anchor) => (
+      <Box className="share-steps" height="100%">
+      <Box   display="flex"
+          width="100%"
+          height="100%"
+          flexDirection="column"
+          bgcolor="primary.drawerBg"
+        className={clsx(classes.list, {
+          [classes.fullList]: anchor === 'top' || anchor === 'bottom',
+        })}
+        role="presentation"
+      
+      >
+        <Box className="common-content" position="relative" height="100%">
+            <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
+              <Box color="text.textBlue">
+                <Typography variant="h6" gutterBottom color="inherit">
+                  Edit
+                </Typography>
+              </Box>
+              <Box
+                className="close-drawer cursor-pointer"
+                display="flex"
+                alignItems="center"
+                color="grey.500"
+                onClick={this.toggleDrawer(anchor, false)}>
+                <CloseIcon color="inherit" />
+              </Box>
+            </Box>
+            <Divider />
+  
+            <Box className="share-sidebar-content share-mamber-content" p={3}>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
+              </Grid>
+            </Grid>
+  
+              <Box>
+              
+              </Box>
+            </Box>
+  
+            <Box
+            className="sidebar-footer"
+            position="absolute"
+            bottom="0"
+            left="0"
+            width="100%"
+            minHeight="82px"
+            px={3}
+            py={1.5}
+            display="flex"
+            alignItems="center"
+            boxSizing="border-box"
+            bgcolor="primary.drawerBg">
+            <Box  pr={1} width="150px" boxSizing="border-box">
+              <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={this.toggleDrawer(anchor, false)}>
+                Cancel
+              </Button>
+            </Box>
+            <Box width="150px" boxSizing="border-box">
+              <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
+                Update
+              </Button>
+            </Box>
+          </Box>
+          </Box>
+      </Box>
+      </Box>
+  
+      // Drawer End here
+      )
+    return (
+      <ThemeProvider theme={theme}>
+      <Box className="container" p={2.5}  bgcolor="primary.lightBgContainer">
+        <Paper className="content lead-page" >
+          <Box className="page-heading" mb={3}>
+            <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
+              <Typography variant="h6" gutterBottom color="inherit">
+                Leads
+              </Typography>
+            </Box>
+            <Divider />
+          </Box>
+  
+  
+  <div className="data-table">
+  <div className={classes.root}>
+        <Paper className={classes.paper} elevation={0}>
+          <EnhancedTableToolbar numSelected={selected.length} />
+          <TableContainer>
+            <Table
+              className={classes.table}
+              aria-labelledby="tableTitle"
+              aria-label="enhanced table"
+            >
+              <EnhancedTableHead
+                classes={classes}
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={this.handleSelectAllClick}
+                onRequestSort={this.handleRequestSort}
+                rowCount={rows.length}
+              />
+              <TableBody>
+                {stableSort(rows, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((Lead, index) => {
+                    const isItemSelected = isSelected(Lead.firstName);
+                    const labelId = `enhanced-table-checkbox-${index}`;
+  
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(event) => this.handleClick(event, Lead.firstName)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={Lead.firstName}
+                        selected={isItemSelected}
+                      >
+                        {/* <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                          />
+                        </TableCell> */}
+                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                          {Lead.lastName}
+                        </TableCell>
+                        <TableCell align="right">{Lead.firstName}</TableCell>
+                        {/* <TableCell align="right">{row.fat}</TableCell>
+                        <TableCell align="right">{row.carbs}</TableCell> */}
+                        <TableCell align="right">
+  <Box display="inline-flex" alignItems="center" ml="auto">
+    <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
+      <EditIcon style={{ fontSize: 18 }} color="inherit" />
+      </Box>
+      <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
+      <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
+      </Box>
+  </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                {emptyRows > 0 && (
+                  <TableRow >
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={allLead.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={this.handleChangePage}
+            onRowsPerPageChange={this.handleChangeRowsPerPage}
+          />
+        </Paper>
+       
+      </div>
+  </div>
+  
+  {/* Drawer Map here */}
+  <div>
+        {['right'].map((anchor) => (
+          <React.Fragment key={anchor}>
+            <Button onClick={this.toggleDrawer(anchor, true)}>{anchor}</Button>
+            <Drawer className="common-sidebar " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false)}>
+              {list(anchor)}
+            </Drawer>
+          </React.Fragment>
+        ))}
+      </div>
+  
+      {/* Drawer Map here */}
+        </Paper>
+      </Box>
+    </ThemeProvider>
+    );
+  }
 }
 
-const rows = [
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Donut', 452, 25.0, 51, 4.9),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-  createData('Honeycomb', 408, 3.2, 87, 6.5),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0),
-  createData('KitKat', 518, 26.0, 65, 7.0),
-  createData('Lollipop', 392, 0.2, 98, 0.0),
-  createData('Marshmallow', 318, 0, 81, 2.0),
-  createData('Nougat', 360, 19.0, 9, 37.0),
-  createData('Oreo', 437, 18.0, 63, 4.0),
-];
+export default withStyles(useStyles)(Leadss)
+
+
+// export default Leads;
+
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -59,6 +399,7 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
+  console.log("getComparator",order)
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -75,12 +416,12 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)' },
-  { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
-  { id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)' },
-  { id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)' },
-  { id: 'protein', numeric: true, disablePadding: false, label: 'Action' },
+  { id: 'firstName', numeric: false, disablePadding: false, label: 'Dessert (100g serving)' },
+  { id: 'lastName', numeric: false, disablePadding: false, label: 'Calories' },
 ];
+
+
+
 
 function EnhancedTableHead(props) {
   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
@@ -91,14 +432,14 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
-        </TableCell>
+        </TableCell> */}
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -134,6 +475,7 @@ EnhancedTableHead.propTypes = {
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
 };
+
 
 const useToolbarStyles = makeStyles((theme) => ({
   root: {
@@ -195,317 +537,3 @@ const EnhancedTableToolbar = (props) => {
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  paper: {
-    width: '100%',
-    marginBottom: theme.spacing(2),
-  },
-  table: {
-    minWidth: 750,
-  },
-  visuallyHidden: {
-    border: 0,
-    clip: 'rect(0 0 0 0)',
-    height: 1,
-    margin: -1,
-    overflow: 'hidden',
-    padding: 0,
-    position: 'absolute',
-    top: 20,
-    width: 1,
-  },
-}));
-
-
-function Leads() {
-  const classes = useStyles();
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-
-  React.useEffect(() => {
-    // Update the document title using the browser API
-
-    const apicall=async() =>{
-      try {
-        const response = await UserService.Getuni()
-       
-        console.log(response);
-      } catch (error) {
-        console.log("status error",error);
-      }
-    }
-    apicall();
-  },[]);
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-
-  const isSelected = (name) => selected.indexOf(name) !== -1;
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
-
-
-// Drawer start here
-
-  const [state, setState] = React.useState({
-    top: false,
-    left: false,
-    bottom: false,
-    right: false,
-  });
-
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-
-    setState({ ...state, [anchor]: open });
-  };
-
-  const list = (anchor) => (
-    <Box className="share-steps" height="100%">
-    <Box   display="flex"
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        bgcolor="primary.drawerBg"
-      className={clsx(classes.list, {
-        [classes.fullList]: anchor === 'top' || anchor === 'bottom',
-      })}
-      role="presentation"
-    
-    >
-      <Box className="common-content" position="relative" height="100%">
-          <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
-            <Box color="text.textBlue">
-              <Typography variant="h6" gutterBottom color="inherit">
-                Edit
-              </Typography>
-            </Box>
-            <Box
-              className="close-drawer cursor-pointer"
-              display="flex"
-              alignItems="center"
-              color="grey.500"
-              onClick={toggleDrawer(anchor, false)}>
-              <CloseIcon color="inherit" />
-            </Box>
-          </Box>
-          <Divider />
-
-          <Box className="share-sidebar-content share-mamber-content" p={3}>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
-            </Grid>
-          </Grid>
-
-            <Box>
-            
-            </Box>
-          </Box>
-
-          <Box
-          className="sidebar-footer"
-          position="absolute"
-          bottom="0"
-          left="0"
-          width="100%"
-          minHeight="82px"
-          px={3}
-          py={1.5}
-          display="flex"
-          alignItems="center"
-          boxSizing="border-box"
-          bgcolor="primary.drawerBg">
-          <Box  pr={1} width="150px" boxSizing="border-box">
-            <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={toggleDrawer(anchor, false)}>
-              Cancel
-            </Button>
-          </Box>
-          <Box width="150px" boxSizing="border-box">
-            <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-              Update
-            </Button>
-          </Box>
-        </Box>
-        </Box>
-    </Box>
-    </Box>
-
-    // Drawer End here
-    )
-  return (
-    <ThemeProvider theme={theme}>
-    <Box className="container" p={2.5}  bgcolor="primary.lightBgContainer">
-      <Paper className="content lead-page" >
-        <Box className="page-heading" mb={3}>
-          <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
-            <Typography variant="h6" gutterBottom color="inherit">
-              Leads
-            </Typography>
-          </Box>
-          <Divider />
-        </Box>
-
-
-<div className="data-table">
-<div className={classes.root}>
-      <Paper className={classes.paper} elevation={0}>
-        <EnhancedTableToolbar numSelected={selected.length} />
-        <TableContainer>
-          <Table
-            className={classes.table}
-            aria-labelledby="tableTitle"
-            aria-label="enhanced table"
-          >
-            <EnhancedTableHead
-              classes={classes}
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.name)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.name}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.calories}</TableCell>
-                      <TableCell align="right">{row.fat}</TableCell>
-                      <TableCell align="right">{row.carbs}</TableCell>
-                      <TableCell align="right">
-<Box display="inline-flex" alignItems="center" ml="auto">
-  <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-    <EditIcon style={{ fontSize: 18 }} color="inherit" />
-    </Box>
-    <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-    <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
-    </Box>
-</Box>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-     
-    </div>
-</div>
-
-{/* Drawer Map here */}
-<div>
-      {['right'].map((anchor) => (
-        <React.Fragment key={anchor}>
-          <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button>
-          <Drawer className="common-sidebar " anchor={anchor} open={state[anchor]} onClose={toggleDrawer(anchor, false)}>
-            {list(anchor)}
-          </Drawer>
-        </React.Fragment>
-      ))}
-    </div>
-
-    {/* Drawer Map here */}
-      </Paper>
-    </Box>
-  </ThemeProvider>
-  );
-}
-
-export default Leads;

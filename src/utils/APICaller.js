@@ -3,46 +3,34 @@ import { useSelector } from "react-redux";
 import { appConfig } from "../config";
 import { store } from "../store";
 const { mainDomain } = appConfig;
-var newState = store.getState().user.loginToken;
-const APICaller = (endpoint, method, body, contentType) =>
-  axios({
-    url: `${mainDomain}/${endpoint}`,
-    method: method || "GET",
-    data: body,
-    headers: {
-      Authorization: newState ? `Bearer  ${newState}` : "",
+
+ const Api = async (endpoint,isauthenticated, method, body, contentType) => {
+  try {
+
+
+    var newState = store.getState().user.loginToken;
+    let headers={
       Accept: "application/json",
       "Content-Type": contentType || "application/json",
-    },
-    responseType: "json",
-  })
-    .then((response) => {
-      console.log(`response from ${mainDomain}/${endpoint} >> ${response}`);
-      return response;
-    })
-    .catch((error) => {
-      console.log(`Error from ${mainDomain}/${endpoint}>> ${error}`);
-
-      throw error.response;
-    });
-
-export const Api = async (endpoint, method, body, contentType) => {
-  try {
-    var newState = store.getState().user.loginToken;
+    };
+    if(isauthenticated){
+      headers = {
+        Authorization: `Bearer  ${newState}`,
+        Accept: "application/json",
+        "Content-Type": contentType || "application/json",
+      }
+    }
+   
 
     const response = await axios({
       url: `${mainDomain}/${endpoint}`,
       method: method || "GET",
       data: body,
-      headers: {
-        Authorization: newState ? `Bearer  ${newState}` : "",
-        Accept: "application/json",
-        "Content-Type": contentType || "application/json",
-      },
+      headers:headers,
       responseType: "json",
     });
 
-    return await response.json();
+    return response;
   } catch (error) {
     if (error.response !== undefined) {
       const errObj = error.response.body;
@@ -54,4 +42,4 @@ export const Api = async (endpoint, method, body, contentType) => {
 
 store.subscribe(Api);
 
-export default APICaller;
+export default Api;

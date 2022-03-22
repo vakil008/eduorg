@@ -16,7 +16,7 @@ const PrivateLayout = () => {
           </div>
         </div>
       ) : (
-        <Navigate to="/dashboard" />
+        <Navigate to="/" />
       )}
     </>
   );
