@@ -118,22 +118,24 @@ class Leadss extends React.PureComponent {
    handleSelectAllClick = (event) => {
      const {allLead}= this.state;
     if (event.target.checked) {
-      const newSelecteds = allLead.map((n) => n.name);
-   
+      const newSelecteds = allLead.map((n) => n.id);
+
 
       this.setState({
-        setSelected:newSelecteds
+        selected:newSelecteds
       });
       return;
     }
-    this.setState({ setSelected: []});
+    this.setState({ selected: []});
   };
 
 
    handleClick = (event, name) => {
+  
     const {
       selected
     } = this.state;
+    console.log(selected)
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -151,7 +153,7 @@ class Leadss extends React.PureComponent {
     }
 
     this.setState({
-      setSelected:newSelected
+      selected:newSelected
     });  
   };
 
@@ -185,7 +187,7 @@ class Leadss extends React.PureComponent {
      const rows= allLead;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, allLead.length - page * rowsPerPage);
 
-   const isSelected = (name) => this.state.selected.indexOf(name) !== -1;
+   const isSelected = (id) => selected.indexOf(id) !== -1;
     const list = (anchor) => (
       <Box className="share-steps" height="100%">
       <Box   display="flex"
@@ -302,31 +304,43 @@ class Leadss extends React.PureComponent {
                 {stableSort(rows, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((Lead, index) => {
-                    const isItemSelected = isSelected(Lead.firstName);
+                    const isItemSelected = isSelected(Lead.id);
                     const labelId = `enhanced-table-checkbox-${index}`;
   
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => this.handleClick(event, Lead.firstName)}
+                        onClick={(event) => this.handleClick(event, Lead.id)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={Lead.firstName}
+                        key={index}
                         selected={isItemSelected}
                       >
-                        {/* <TableCell padding="checkbox">
+                        <TableCell padding="checkbox">
                           <Checkbox
                             checked={isItemSelected}
                             inputProps={{ 'aria-labelledby': labelId }}
                           />
-                        </TableCell> */}
-                        <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {Lead.lastName}
                         </TableCell>
-                        <TableCell align="right">{Lead.firstName}</TableCell>
+                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                          {Lead.firstName}
+                        </TableCell>
+                        <TableCell align="center">{Lead.lastName}</TableCell>
+                        <TableCell align="center">{Lead.dob}</TableCell>
+                        <TableCell align="center">{Lead.emailAddress}</TableCell>
+                        <TableCell align="center">{Lead.mobileNumber}</TableCell>
+                        <TableCell align="center">{Lead.leadSource.name}</TableCell>
+                        <TableCell align="center">{Lead.branch.name}</TableCell>
+                        
+                        <TableCell align="center">{Lead.listeningScore}</TableCell>
+                        <TableCell align="center">{Lead.readingScore}</TableCell>
+
+                        <TableCell align="center">{Lead.writingScore}</TableCell>
+                        <TableCell align="center">{Lead.speakingScore}</TableCell>
                         {/* <TableCell align="right">{row.fat}</TableCell>
                         <TableCell align="right">{row.carbs}</TableCell> */}
+                        <TableCell align="center">{Lead.leadsStatus.name}</TableCell>
                         <TableCell align="right">
   <Box display="inline-flex" alignItems="center" ml="auto">
     <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
@@ -363,7 +377,7 @@ class Leadss extends React.PureComponent {
   </div>
   
   {/* Drawer Map here */}
-  <div>
+  {/* <div>
         {['right'].map((anchor) => (
           <React.Fragment key={anchor}>
             <Button onClick={this.toggleDrawer(anchor, true)}>{anchor}</Button>
@@ -372,7 +386,7 @@ class Leadss extends React.PureComponent {
             </Drawer>
           </React.Fragment>
         ))}
-      </div>
+      </div> */}
   
       {/* Drawer Map here */}
         </Paper>
@@ -416,8 +430,20 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'firstName', numeric: false, disablePadding: false, label: 'Dessert (100g serving)' },
-  { id: 'lastName', numeric: false, disablePadding: false, label: 'Calories' },
+  { id: 'firstName', numeric: false, disablePadding: false, label: 'First Name' },
+  { id: 'lastName', numeric: false, disablePadding: false, label: 'Last Name' },
+  { id: 'dob', numeric: false, disablePadding: false, label: 'Date Of Birth' },
+  { id: 'emailAddress', numeric: false, disablePadding: false, label: 'Email' },
+  { id: 'mobileNumber', numeric: false, disablePadding: false, label: 'Mobile Number' },
+  { id: 'leadSource', numeric: false, disablePadding: false, label: 'Source' },
+  { id: 'branch', numeric: false, disablePadding: false, label: 'Branch' },
+ 
+  { id: 'listeningScore', numeric: false, disablePadding: false, label: 'Listening Score' },
+  { id: 'readingScore', numeric: false, disablePadding: false, label: 'ReadingScore' },
+  { id: 'writingScore', numeric: false, disablePadding: false, label: 'Writing Score' },
+  { id: 'speakingScore', numeric: false, disablePadding: false, label: 'Speaking Score' },
+  { id: 'leadsStatus', numeric: false, disablePadding: false, label: 'Status' },
+  { id: 'Action', numeric: false, disablePadding: false, label: 'Action' }
 ];
 
 
@@ -432,14 +458,14 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        {/* <TableCell padding="checkbox">
+        <TableCell padding="checkbox">
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
-        </TableCell> */}
+        </TableCell>
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
