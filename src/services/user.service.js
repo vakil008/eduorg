@@ -74,6 +74,28 @@ const GetAllLeadSource = async () => {
   }
 };
 
+const GetAllBranch = async () => {
+  try {
+    const { all_branches } = endPoints;
+
+    const res = await Api(all_branches);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetAllLeadsStatus = async () => {
+  try {
+    const { all_leads_status } = endPoints;
+
+    const res = await Api(all_leads_status);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 const UserService = {
   singin,
   Getuni,
@@ -81,5 +103,7 @@ const UserService = {
   GetAllCountry,
   GetAllVisaTypes,
   GetAllLeadSource,
+  GetAllBranch,
+  GetAllLeadsStatus,
 };
 export default UserService;

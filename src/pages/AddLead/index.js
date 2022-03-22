@@ -57,10 +57,14 @@ class AddLead extends React.PureComponent {
       passportNo: "qweqweq",
       maritalStatus: "yes",
       allCountries: [],
-      countryId: "",
+      countryId: "1",
       allLeads: [],
+      allLeadsStatus: [],
+      leadStatusId: "1",
       leadId: "1",
       allVisaTypes: [],
+      allBranch: [],
+      branchId: "1",
       allQualifications: [],
       qualificationInputs: [
         {
@@ -84,10 +88,10 @@ class AddLead extends React.PureComponent {
       ],
       visaRefusaleses: [
         {
-          refVisaID: "1",
-          refCountry: "yes",
-          refReason: "asdasd",
-          refRemarks: "asdasdas",
+          refVisaID: 1,
+          refCountry: "1",
+          refReason: "sadas",
+          refRemarks: "asdasd",
         },
       ],
       spouseQualifications: [
@@ -115,10 +119,12 @@ class AddLead extends React.PureComponent {
   }
 
   componentDidMount() {
+    this.getAllBranch();
     this.getAllQualifications();
     this.getAllLeadSource();
     this.getAllVisaTypes();
     this.getAllCountries();
+    this.getAllLeadStatus();
   }
 
   addQuifications = () => {
@@ -142,9 +148,10 @@ class AddLead extends React.PureComponent {
     });
   };
 
-  removeQualifications = () => {
+  removeQualifications = (index) => {
+    console.log("index", index);
     let qualificationInputs = [...this.state.qualificationInputs];
-    qualificationInputs.splice(qualificationInputs.length - 1);
+    qualificationInputs.splice(index, 1);
     this.setState({
       qualificationInputs,
     });
@@ -171,11 +178,39 @@ class AddLead extends React.PureComponent {
     });
   };
 
-  removeVisaInfos = () => {
+  removeVisaInfos = (index) => {
+    console.log("index", index);
     let visaInfos = [...this.state.visaInfos];
-    visaInfos.splice(visaInfos.length - 1);
+    visaInfos.splice(index, 1);
     this.setState({
       visaInfos,
+    });
+  };
+
+  addRefUsaleses = () => {
+    let visaRefusaleses = [...this.state.visaRefusaleses];
+    const obj = {
+      refVisaId: "",
+      refCountry: "",
+      refReason: "",
+      refRemarks: "",
+    };
+    if (visaRefusaleses.length == 5) {
+      console.log("you could not add more than 5 qualifications");
+    } else {
+      visaRefusaleses.push(obj);
+    }
+    this.setState({
+      visaRefusaleses,
+    });
+  };
+
+  removeRefUsaleses = (index) => {
+    console.log("index", index);
+    let visaRefusaleses = [...this.state.visaRefusaleses];
+    visaRefusaleses.splice(index, 1);
+    this.setState({
+      visaRefusaleses,
     });
   };
 
@@ -199,16 +234,13 @@ class AddLead extends React.PureComponent {
     });
   };
 
-  removeSpouseQualifications = () => {
+  removeSpouseQualifications = (index) => {
+    console.log("index", index);
     let spouseQualifications = [...this.state.spouseQualifications];
-    spouseQualifications.splice(spouseQualifications.length - 1);
+    spouseQualifications.splice(index, 1);
     this.setState({
       spouseQualifications,
     });
-  };
-
-  handleDateChange = (date) => {
-    this.setState({ selectedDate: date });
   };
 
   handleSelectChange = (event) => {
@@ -222,10 +254,212 @@ class AddLead extends React.PureComponent {
     });
   };
 
-  handleWorkChange = (event) => {
-    this.setState({
-      gender: event.target.value,
+  onSubmit = () => {
+    let {
+      visaInfos,
+      dateOfBirth,
+      workExpId,
+      visaRefusaleses,
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      remarks,
+      workDuration,
+      passportNo,
+      maritalStatus,
+      countryId,
+      readingScore,
+      listeningScore,
+      leadId,
+      writingScore,
+      speakingScore,
+      overAllScore,
+      spouseFirstName,
+      spouseLastName,
+      spouseDob,
+      spouseMobileNumber,
+      spouseAddress,
+      spouseRemarks,
+      spouseWorkexperience,
+      spouseWorkduration,
+      spousePassportnumber,
+      leadStatusId,
+    } = this.state;
+    console.log("state", this.state);
+
+    let spouseQualifications = [...this.state.spouseQualifications];
+    let userQualifications = [...this.state.qualificationInputs];
+
+    let createUserVisa = [];
+    let spouseQualifi = [];
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", "<API Key>");
+
+    for (let i = 0; i < userQualifications.length; i++) {
+      let obj = {};
+      obj = userQualifications[i];
+      delete obj["date"];
+      delete obj["open"];
+      delete obj["uniBoard"];
+    }
+
+    for (let i = 0; i < visaInfos.length; i++) {
+      const {
+        visaCountry,
+        visaUniversity,
+        visaCity,
+        visaReason,
+        visaRemarks,
+        visaId,
+      } = visaInfos[i];
+
+      let obj = {};
+      obj["visaTypeId"] = visaId;
+      obj["countryId"] = visaCountry;
+      obj["city"] = visaCity;
+      obj["reason"] = visaReason;
+      obj["remarks"] = visaRemarks;
+      //obj[''] = visaUniversity;
+      createUserVisa.push(obj);
+    }
+    console.log("cheeekkk", spouseQualifications);
+    for (let i = 0; i < spouseQualifications.length; i++) {
+      let obj = {};
+      obj = spouseQualifications[i];
+      delete obj.date;
+      delete obj.open;
+      spouseQualifi.push(obj);
+    }
+
+    console.log("spouseQualifications state", spouseQualifi);
+
+    var raw = JSON.stringify({
+      firstName: firstName,
+      lastName: lastName,
+      DateOfBirth: dateOfBirth,
+      emailAddress: email,
+      mobileNumber: phone,
+      address: address,
+      remarks: remarks,
+      workexperience: workExpId === "yes" ? true : false,
+      workduration: workDuration,
+      passportnumber: passportNo,
+      branchId: 1,
+      ismaritalstatus: maritalStatus === "yes" ? true : false,
+      listeningScore: listeningScore,
+      readingScore: readingScore,
+      writingScore: writingScore,
+      speakingScore: speakingScore,
+      overAllScore: overAllScore,
+      countryId: countryId,
+      leadSourceId: leadId,
+      leadsStatusId: leadStatusId,
+      spouse: {
+        firstName: spouseFirstName,
+        lastName: spouseLastName,
+        DateOfBirth: spouseDob,
+        mobileNumber: spouseMobileNumber,
+        address: spouseAddress,
+        remarks: spouseRemarks,
+        workexperience: spouseWorkexperience === "yes" ? true : false,
+        workduration: spouseWorkduration,
+        passportnumber: spousePassportnumber,
+        spouseQualifications: spouseQualifi,
+      },
+      userQualifications: userQualifications,
+      createUserVisa: createUserVisa,
+      visaRefusaleses: visaRefusaleses,
     });
+    console.log("rawraw", raw);
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://crmleadedu.herokuapp.com/api/v1/Leads", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        // this.setState({
+        //   overAllScore: "",
+        //   speakingScore: "",
+        //   writingScore: "",
+        //   readingScore: "",
+        //   listeningScore: "",
+        //   dateOfBirth: "",
+        //   workExpId: "",
+        //   firstName: "",
+        //   lastName: "",
+        //   dob: "",
+        //   email: "",
+        //   phone: "",
+        //   address: "",
+        //   remarks: "",
+        //   workDuration: "",
+        //   passportNo: "",
+        //   maritalStatus: "",
+        //   countryId: "",
+
+        //   leadStatusId: "",
+        //   qualificationInputs: [
+        //     {
+        //       date: new Date(),
+        //       open: false,
+        //       qualificationId: "",
+        //       passingYear: "",
+        //       percentage: "",
+        //       uniBoard: "",
+        //       description: "",
+        //     },
+        //   ],
+        //   visaInfos: [
+        //     {
+        //       visaCountry: "",
+        //       visaUniversity: "",
+        //       visaCity: "",
+        //       visaReason: "",
+        //       visaRemarks: "",
+        //       visaId: "",
+        //     },
+        //   ],
+        //   visaRefusaleses: [
+        //     {
+        //       refVisaID: "",
+        //       refCountry: "",
+        //       refReason: "",
+        //       refRemarks: "",
+        //     },
+        //   ],
+        //   spouseQualifications: [
+        //     {
+        //       date: new Date(),
+        //       open: false,
+        //       qualificationId: "",
+        //       passingYear: "",
+        //       percentage: "",
+        //       description: "",
+        //     },
+        //   ],
+        //   spouseEmail: "",
+        //   spouseFirstName: "",
+        //   spouseLastName: "",
+        //   spouseDob: "",
+        //   spouseMobileNumber: "",
+        //   spouseAddress: "",
+        //   spouseRemarks: "",
+        //   spouseWorkexperience: "",
+        //   spouseWorkduration: "",
+        //   spousePassportnumber: "",
+        // });
+      })
+      .catch((error) => console.log("error", error));
   };
 
   getAllQualifications = async () => {
@@ -250,7 +484,7 @@ class AddLead extends React.PureComponent {
   getAllCountries = async () => {
     try {
       const response = await UserService.GetAllCountry();
-      console.log("response of qualifications", response);
+      console.log("response of getAllCountries", response);
 
       const { data } = response;
       const { data: list, succeeded } = data;
@@ -266,10 +500,31 @@ class AddLead extends React.PureComponent {
     }
   };
 
+  getAllLeadStatus = async () => {
+    try {
+      const response = await UserService.GetAllLeadsStatus();
+      console.log("response of getAllLeadStatus", response);
+
+      const { data } = response;
+      if (data) {
+        const { data: list, succeeded } = data;
+        if (succeeded) {
+          if (list && list.length) {
+            this.setState({
+              allLeadsStatus: list,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
   getAllVisaTypes = async () => {
     try {
       const response = await UserService.GetAllVisaTypes();
-      console.log("response of qualifications", response);
+      console.log("response of getAllVisaTypes", response);
 
       const { data } = response;
       const { data: list, succeeded } = data;
@@ -288,7 +543,7 @@ class AddLead extends React.PureComponent {
   getAllLeadSource = async () => {
     try {
       const response = await UserService.GetAllLeadSource();
-      console.log("response of qualifications", response);
+      console.log("response of getAllLeadSource", response);
 
       const { data } = response;
       const { data: list, succeeded } = data;
@@ -296,6 +551,25 @@ class AddLead extends React.PureComponent {
         if (list && list.length) {
           this.setState({
             allLeads: list,
+          });
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  getAllBranch = async () => {
+    try {
+      const response = await UserService.GetAllBranch();
+      console.log("response of getAllBranch", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            allBranch: list,
           });
         }
       }
@@ -319,7 +593,35 @@ class AddLead extends React.PureComponent {
       countryId,
       leadId,
       visaInfos,
-      visaId,
+      email,
+      firstName,
+      lastName,
+      address,
+      phone,
+      dateOfBirth,
+      remarks,
+      spouseDob,
+      passportNo,
+      allBranch,
+      branchId,
+      listeningScore,
+      readingScore,
+      writingScore,
+      speakingScore,
+      spouseFirstName,
+      spouseRemarks,
+      spouseEmail,
+      spouseLastName,
+      spouseMobileNumber,
+      spouseAddress,
+      spouseWorkexperience,
+      spouseWorkduration,
+      spousePassportnumber,
+      workExpId,
+      maritalStatus,
+      visaRefusaleses,
+      allLeadsStatus,
+      leadStatusId,
     } = this.state;
     return (
       <ThemeProvider theme={theme}>
@@ -340,16 +642,28 @@ class AddLead extends React.PureComponent {
                   <TextField
                     type="text"
                     label="First Name"
+                    value={firstName}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        firstName: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Last Name"
+                    value={lastName}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        lastName: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -362,8 +676,12 @@ class AddLead extends React.PureComponent {
                       margin="normal"
                       id="date-picker-inline"
                       label="Date Of Birth"
-                      value={selectedDate}
-                      onChange={this.handleDateChange}
+                      value={dateOfBirth ? dateOfBirth : selectedDate}
+                      onChange={(date) => {
+                        this.setState({
+                          dateOfBirth: date,
+                        });
+                      }}
                       className="custom-datepicker"
                       KeyboardButtonProps={{
                         "aria-label": "change date",
@@ -375,8 +693,14 @@ class AddLead extends React.PureComponent {
                   <TextField
                     type="text"
                     label="Email Address"
+                    value={email}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        email: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -385,24 +709,42 @@ class AddLead extends React.PureComponent {
                   <TextField
                     type="number"
                     label="Mobile Number"
+                    value={phone}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        phone: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Address"
+                    value={address}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        address: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Remarks"
+                    value={remarks}
                     variant="outlined"
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        remarks: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3} className="work-experience">
@@ -420,16 +762,20 @@ class AddLead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={gender}
-                      onChange={this.handleWorkChange}
+                      value={workExpId}
+                      onChange={(event) => {
+                        this.setState({
+                          workExpId: event.target.value,
+                        });
+                      }}
                     >
                       <FormControlLabel
-                        value="female"
+                        value="yes"
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="male"
+                        value="no"
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -465,7 +811,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Passport Number"
                     variant="outlined"
+                    value={passportNo}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        passportNo: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -476,16 +828,24 @@ class AddLead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={branch}
-                      onChange={this.handleBranchChange}
+                      value={branchId}
+                      onChange={(event) => {
+                        this.setState({
+                          branchId: event.target.value,
+                        });
+                      }}
                       label="Branch"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
+                      {allBranch.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.name}
+                          </MenuItem>
+                        );
+                      })}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -503,16 +863,20 @@ class AddLead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={gender}
-                      onChange={this.handleWorkChange}
+                      value={maritalStatus}
+                      onChange={(event) => {
+                        this.setState({
+                          maritalStatus: event.target.value,
+                        });
+                      }}
                     >
                       <FormControlLabel
-                        value="female"
+                        value="yes"
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="male"
+                        value="no"
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -527,7 +891,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Listening Score"
                     variant="outlined"
+                    value={listeningScore}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        listeningScore: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -535,7 +905,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Reading Score"
                     variant="outlined"
+                    value={readingScore}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        readingScore: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -543,7 +919,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Writing Score"
                     variant="outlined"
+                    value={writingScore}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        writingScore: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -551,7 +933,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Speaking Score"
                     variant="outlined"
+                    value={speakingScore}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        speakingScore: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -636,16 +1024,24 @@ class AddLead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={branch}
-                      onChange={this.handleBranchChange}
+                      value={leadStatusId}
+                      onChange={(event) => {
+                        this.setState({
+                          leadStatusId: event.target.value,
+                        });
+                      }}
                       label="Lead Status"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
+                      {allLeadsStatus.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.name}
+                          </MenuItem>
+                        );
+                      })}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -662,9 +1058,6 @@ class AddLead extends React.PureComponent {
                 <Typography variant="subtitle1" gutterBottom color="inherit">
                   Spouse
                 </Typography>
-                <Box ml="auto" className="cursor-pointer">
-                  <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
-                </Box>
               </Box>
 
               <Grid container spacing={3}>
@@ -673,7 +1066,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="First Name"
                     variant="outlined"
+                    value={spouseFirstName}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseFirstName: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -681,7 +1080,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Last Name"
                     variant="outlined"
+                    value={spouseLastName}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseLastName: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -694,8 +1099,12 @@ class AddLead extends React.PureComponent {
                       margin="normal"
                       id="date-picker-inline"
                       label="Date Of Birth"
-                      value={selectedDate}
-                      onChange={this.handleDateChange}
+                      value={spouseDob ? spouseDob : selectedDate}
+                      onChange={(date) => {
+                        this.setState({
+                          spouseDob: date,
+                        });
+                      }}
                       className="custom-datepicker"
                       KeyboardButtonProps={{
                         "aria-label": "change date",
@@ -708,7 +1117,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Email Address"
                     variant="outlined"
+                    value={spouseEmail}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseEmail: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -718,7 +1133,13 @@ class AddLead extends React.PureComponent {
                     type="number"
                     label="Mobile Number"
                     variant="outlined"
+                    value={spouseMobileNumber}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseMobileNumber: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -726,7 +1147,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Address"
                     variant="outlined"
+                    value={spouseAddress}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseAddress: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -734,7 +1161,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Remarks"
                     variant="outlined"
+                    value={spouseRemarks}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseRemarks: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
                 <Grid item xs={3} className="work-experience">
@@ -752,16 +1185,20 @@ class AddLead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={gender}
-                      onChange={this.handleWorkChange}
+                      value={spouseWorkexperience}
+                      onChange={(event) => {
+                        this.setState({
+                          spouseWorkexperience: event.target.value,
+                        });
+                      }}
                     >
                       <FormControlLabel
-                        value="female"
+                        value="yes"
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="male"
+                        value="no"
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -797,7 +1234,13 @@ class AddLead extends React.PureComponent {
                     type="text"
                     label="Passport Number"
                     variant="outlined"
+                    value={spousePassportnumber}
                     className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spousePassportnumber: event.target.value,
+                      });
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -824,6 +1267,30 @@ class AddLead extends React.PureComponent {
               {spouseQualifications.map((data, index) => {
                 return (
                   <>
+                    {spouseQualifications.length > 1 && index !== 0 ? (
+                      <Box
+                        color="text.secondary"
+                        mt={3}
+                        mb={2}
+                        className="spouse-heading"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeSpouseQualifications(index)}
+                          className="cursor-pointer"
+                        >
+                          <AddCircleIcon
+                            color="primary"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                      </Box>
+                    ) : (
+                      ""
+                    )}
+
                     <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
@@ -906,12 +1373,14 @@ class AddLead extends React.PureComponent {
                           label="Percentage"
                           variant="outlined"
                           className="custom-textfield"
-                          onChange={(value) => {
+                          value={spouseQualifications[index]["percentage"]}
+                          onChange={(event) => {
                             let spouseQualifications = [];
                             spouseQualifications = [
                               ...this.state.spouseQualifications,
                             ];
-                            spouseQualifications[index]["percentage"] = value;
+                            spouseQualifications[index]["percentage"] =
+                              event.target.value;
                             this.setState({
                               spouseQualifications,
                             });
@@ -923,13 +1392,15 @@ class AddLead extends React.PureComponent {
                           type="text"
                           label="Description"
                           variant="outlined"
+                          value={spouseQualifications[index]["description"]}
                           className="custom-textfield"
-                          onChange={(value) => {
+                          onChange={(event) => {
                             let spouseQualifications = [];
                             spouseQualifications = [
                               ...this.state.spouseQualifications,
                             ];
-                            spouseQualifications[index]["description"] = value;
+                            spouseQualifications[index]["description"] =
+                              event.target.value;
                             this.setState({
                               spouseQualifications,
                             });
@@ -990,6 +1461,29 @@ class AddLead extends React.PureComponent {
               {qualificationInputs.map((data, index) => {
                 return (
                   <>
+                    {qualificationInputs.length > 1 && index !== 0 ? (
+                      <Box
+                        color="text.secondary"
+                        mt={3}
+                        mb={2}
+                        className="spouse-heading"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeQualifications(index)}
+                          className="cursor-pointer"
+                        >
+                          <AddCircleIcon
+                            color="primary"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                      </Box>
+                    ) : (
+                      ""
+                    )}
                     <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
@@ -1071,12 +1565,14 @@ class AddLead extends React.PureComponent {
                           label="Percentage"
                           variant="outlined"
                           className="custom-textfield"
-                          onChange={(value) => {
+                          value={qualificationInputs[index]["percentage"]}
+                          onChange={(event) => {
                             let qualificationInputs = [];
                             qualificationInputs = [
                               ...this.state.qualificationInputs,
                             ];
-                            qualificationInputs[index]["percentage"] = value;
+                            qualificationInputs[index]["percentage"] =
+                              event.target.value;
                             this.setState({
                               qualificationInputs,
                             });
@@ -1089,12 +1585,14 @@ class AddLead extends React.PureComponent {
                           label="Description"
                           variant="outlined"
                           className="custom-textfield"
-                          onChange={(value) => {
+                          value={qualificationInputs[index]["description"]}
+                          onChange={(event) => {
                             let qualificationInputs = [];
                             qualificationInputs = [
                               ...this.state.qualificationInputs,
                             ];
-                            qualificationInputs[index]["description"] = value;
+                            qualificationInputs[index]["description"] =
+                              event.target.value;
                             this.setState({
                               qualificationInputs,
                             });
@@ -1153,7 +1651,30 @@ class AddLead extends React.PureComponent {
               {visaInfos.map((data, index) => {
                 return (
                   <>
-                    <Grid container spacing={3}>
+                    {visaInfos.length > 1 && index !== 0 ? (
+                      <Box
+                        color="text.secondary"
+                        mt={3}
+                        mb={2}
+                        className="spouse-heading"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeVisaInfos(index)}
+                          className="cursor-pointer"
+                        >
+                          <AddCircleIcon
+                            color="primary"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                      </Box>
+                    ) : (
+                      ""
+                    )}
+                    <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
                           variant="outlined"
@@ -1165,8 +1686,17 @@ class AddLead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={visaId}
-                            onChange={this.handleSelectChange}
+                            value={visaInfos[index]["visaId"]}
+                            onChange={(event) => {
+                              if (event.target.value) {
+                                let visaInfos = [];
+                                visaInfos = [...this.state.visaInfos];
+                                visaInfos[index]["visaId"] = event.target.value;
+                                this.setState({
+                                  visaInfos,
+                                });
+                              }
+                            }}
                             label="Visa Type"
                           >
                             <MenuItem value="">
@@ -1196,16 +1726,33 @@ class AddLead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={age}
-                            onChange={this.handleSelectChange}
+                            value={visaInfos[index]["visaCountry"]}
+                            onChange={(event) => {
+                              if (event.target.value) {
+                                let visaInfos = [];
+                                visaInfos = [...this.state.visaInfos];
+                                visaInfos[index]["visaCountry"] =
+                                  event.target.value;
+                                this.setState({
+                                  visaInfos,
+                                });
+                              }
+                            }}
                             label="Country"
                           >
                             <MenuItem value="">
                               <em>None</em>
                             </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            {allCountries.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.countryDescription}
+                                </MenuItem>
+                              );
+                            })}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -1216,6 +1763,15 @@ class AddLead extends React.PureComponent {
                           label="City"
                           variant="outlined"
                           className="custom-textfield"
+                          value={visaInfos[index]["visaCity"]}
+                          onChange={(event) => {
+                            let visaInfos = [];
+                            visaInfos = [...this.state.visaInfos];
+                            visaInfos[index]["visaCity"] = event.target.value;
+                            this.setState({
+                              visaInfos,
+                            });
+                          }}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1224,6 +1780,15 @@ class AddLead extends React.PureComponent {
                           label="Reason"
                           variant="outlined"
                           className="custom-textfield"
+                          value={visaInfos[index]["visaReason"]}
+                          onChange={(event) => {
+                            let visaInfos = [];
+                            visaInfos = [...this.state.visaInfos];
+                            visaInfos[index]["visaReason"] = event.target.value;
+                            this.setState({
+                              visaInfos,
+                            });
+                          }}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1232,6 +1797,186 @@ class AddLead extends React.PureComponent {
                           label="remarks"
                           variant="outlined"
                           className="custom-textfield"
+                          value={visaInfos[index]["visaRemarks"]}
+                          onChange={(event) => {
+                            let visaInfos = [];
+                            visaInfos = [...this.state.visaInfos];
+                            visaInfos[index]["visaRemarks"] =
+                              event.target.value;
+                            this.setState({
+                              visaInfos,
+                            });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </>
+                );
+              })}
+
+              <Box
+                color="text.secondary"
+                mt={3}
+                mb={2}
+                className="spouse-heading"
+                display="flex"
+                alignItems="center"
+              >
+                <Typography variant="subtitle1" gutterBottom color="inherit">
+                  User Refusales Visa
+                </Typography>
+                <Box
+                  ml="auto"
+                  onClick={this.addRefUsaleses}
+                  className="cursor-pointer"
+                >
+                  <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
+                </Box>
+              </Box>
+              {visaRefusaleses.map((data, index) => {
+                return (
+                  <>
+                    {visaRefusaleses.length > 1 && index !== 0 ? (
+                      <Box
+                        color="text.secondary"
+                        mt={3}
+                        mb={2}
+                        className="spouse-heading"
+                        display="flex"
+                        alignItems="center"
+                      >
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeRefUsaleses(index)}
+                          className="cursor-pointer"
+                        >
+                          <AddCircleIcon
+                            color="primary"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                      </Box>
+                    ) : (
+                      ""
+                    )}
+                    <Grid key={index.toString()} container spacing={3}>
+                      <Grid item xs={3}>
+                        <FormControl
+                          variant="outlined"
+                          className="custom-textfield"
+                        >
+                          <InputLabel id="demo-simple-select-outlined-label">
+                            Visa Type
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={visaRefusaleses[index]["refVisaID"]}
+                            onChange={(event) => {
+                              let visaRefusaleses = [];
+                              visaRefusaleses = [...this.state.visaRefusaleses];
+                              visaRefusaleses[index]["refVisaID"] =
+                                event.target.value;
+                              this.setState({
+                                visaRefusaleses,
+                              });
+                            }}
+                            label="Visa Type"
+                          >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            {allVisaTypes.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormControl
+                          variant="outlined"
+                          className="custom-textfield"
+                        >
+                          <InputLabel id="demo-simple-select-outlined-label">
+                            Country
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={visaRefusaleses[index]["refCountry"]}
+                            onChange={(event) => {
+                              if (event.target.value) {
+                                let visaRefusaleses = [];
+                                visaRefusaleses = [
+                                  ...this.state.visaRefusaleses,
+                                ];
+                                visaRefusaleses[index]["refCountry"] =
+                                  event.target.value;
+                                this.setState({
+                                  visaRefusaleses,
+                                });
+                              }
+                            }}
+                            label="Country"
+                          >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            {allCountries.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.countryDescription}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      <Grid item xs={3}>
+                        <TextField
+                          type="text"
+                          label="Reason"
+                          variant="outlined"
+                          value={visaRefusaleses[index]["refReason"]}
+                          className="custom-textfield"
+                          onChange={(event) => {
+                            let visaRefusaleses = [];
+                            visaRefusaleses = [...this.state.visaRefusaleses];
+                            visaRefusaleses[index]["refReason"] =
+                              event.target.value;
+                            this.setState({
+                              visaRefusaleses,
+                            });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField
+                          type="text"
+                          label="remarks"
+                          variant="outlined"
+                          className="custom-textfield"
+                          value={visaRefusaleses[index]["refRemarks"]}
+                          onChange={(event) => {
+                            let visaRefusaleses = [];
+                            visaRefusaleses = [...this.state.visaRefusaleses];
+                            visaRefusaleses[index]["refRemarks"] =
+                              event.target.value;
+                            this.setState({
+                              visaRefusaleses,
+                            });
+                          }}
                         />
                       </Grid>
                     </Grid>
@@ -1245,6 +1990,7 @@ class AddLead extends React.PureComponent {
                   color="primary"
                   disableElevation
                   size="large"
+                  onClick={this.onSubmit}
                   className="custom-button"
                 >
                   Submit
