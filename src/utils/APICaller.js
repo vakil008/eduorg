@@ -3,14 +3,14 @@ import { useSelector } from "react-redux";
 import { appConfig } from "../config";
 import { store } from "../store";
 const { mainDomain } = appConfig;
-
+var newState = store.getState().user.loginToken;
 const APICaller = (endpoint, method, body, contentType) =>
   axios({
     url: `${mainDomain}/${endpoint}`,
     method: method || "GET",
     data: body,
     headers: {
-      Authorization: "WVdzdGVXOTFkSFZpWlMxdGIyUjFiR1ZBZG1scmNtRnQ=",
+      Authorization: newState ? `Bearer  ${newState}` : "",
       Accept: "application/json",
       "Content-Type": contentType || "application/json",
     },
@@ -28,14 +28,14 @@ const APICaller = (endpoint, method, body, contentType) =>
 
 export const Api = async (endpoint, method, body, contentType) => {
   try {
-    var newState = store.getState();
+    var newState = store.getState().user.loginToken;
 
     const response = await axios({
       url: `${mainDomain}/${endpoint}`,
       method: method || "GET",
       data: body,
       headers: {
-        Authorization: `Bearer  ${newState.user.loginToken}`,
+        Authorization: newState ? `Bearer  ${newState}` : "",
         Accept: "application/json",
         "Content-Type": contentType || "application/json",
       },

@@ -116,6 +116,9 @@ class AddLead extends React.PureComponent {
 
   componentDidMount() {
     this.getAllQualifications();
+    this.getAllLeadSource();
+    this.getAllVisaTypes();
+    this.getAllCountries();
   }
 
   addQuifications = () => {
@@ -244,6 +247,63 @@ class AddLead extends React.PureComponent {
     }
   };
 
+  getAllCountries = async () => {
+    try {
+      const response = await UserService.GetAllCountry();
+      console.log("response of qualifications", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            allCountries: list,
+          });
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  getAllVisaTypes = async () => {
+    try {
+      const response = await UserService.GetAllVisaTypes();
+      console.log("response of qualifications", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            allVisaTypes: list,
+          });
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  getAllLeadSource = async () => {
+    try {
+      const response = await UserService.GetAllLeadSource();
+      console.log("response of qualifications", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            allLeads: list,
+          });
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
   render() {
     const {
       selectedDate,
@@ -253,6 +313,9 @@ class AddLead extends React.PureComponent {
       qualificationInputs,
       allQualifications,
       spouseQualifications,
+      allCountries,
+      allLeads,
+      allVisaTypes,
     } = this.state;
     return (
       <ThemeProvider theme={theme}>

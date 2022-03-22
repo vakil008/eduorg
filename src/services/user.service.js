@@ -41,9 +41,45 @@ const GetAllQualification = async () => {
   }
 };
 
+const GetAllCountry = async () => {
+  try {
+    const { all_countries } = endPoints;
+
+    const res = await Api(all_countries);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetAllVisaTypes = async () => {
+  try {
+    const { all_visa_type } = endPoints;
+
+    const res = await Api(all_visa_type);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetAllLeadSource = async () => {
+  try {
+    const { all_lead_source } = endPoints;
+
+    const res = await Api(all_lead_source);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 const UserService = {
   singin,
   Getuni,
   GetAllQualification,
+  GetAllCountry,
+  GetAllVisaTypes,
+  GetAllLeadSource,
 };
 export default UserService;
