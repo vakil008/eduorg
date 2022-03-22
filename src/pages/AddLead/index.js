@@ -316,6 +316,10 @@ class AddLead extends React.PureComponent {
       allCountries,
       allLeads,
       allVisaTypes,
+      countryId,
+      leadId,
+      visaInfos,
+      visaId,
     } = this.state;
     return (
       <ThemeProvider theme={theme}>
@@ -562,16 +566,30 @@ class AddLead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={branch}
-                      onChange={this.handleBranchChange}
+                      value={countryId}
+                      onChange={(event) => {
+                        if (event.target.value) {
+                          this.setState({
+                            countryId: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            countryId: "",
+                          });
+                        }
+                      }}
                       label="Country"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
+                      {allCountries.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.countryDescription}
+                          </MenuItem>
+                        );
+                      })}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -583,16 +601,30 @@ class AddLead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={branch}
-                      onChange={this.handleBranchChange}
+                      value={leadId}
+                      onChange={(event) => {
+                        if (event.target.value) {
+                          this.setState({
+                            leadId: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            leadId: "",
+                          });
+                        }
+                      }}
                       label="Lead Source"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
+                      {allLeads.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.name}
+                          </MenuItem>
+                        );
+                      })}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -828,7 +860,12 @@ class AddLead extends React.PureComponent {
                             </MenuItem>
                             {allQualifications.map((data, index) => {
                               return (
-                                <MenuItem value={data.id}>{data.name}</MenuItem>
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
                               );
                             })}
                           </Select>
@@ -988,7 +1025,12 @@ class AddLead extends React.PureComponent {
                             </MenuItem>
                             {allQualifications.map((data, index) => {
                               return (
-                                <MenuItem value={data.id}>{data.name}</MenuItem>
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
                               );
                             })}
                           </Select>
@@ -1100,80 +1142,102 @@ class AddLead extends React.PureComponent {
                 <Typography variant="subtitle1" gutterBottom color="inherit">
                   Create User Visa
                 </Typography>
-                <Box ml="auto" className="cursor-pointer">
+                <Box
+                  ml="auto"
+                  onClick={this.addMoreVisaInfos}
+                  className="cursor-pointer"
+                >
                   <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
                 </Box>
               </Box>
+              {visaInfos.map((data, index) => {
+                return (
+                  <>
+                    <Grid container spacing={3}>
+                      <Grid item xs={3}>
+                        <FormControl
+                          variant="outlined"
+                          className="custom-textfield"
+                        >
+                          <InputLabel id="demo-simple-select-outlined-label">
+                            Visa Type
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={visaId}
+                            onChange={this.handleSelectChange}
+                            label="Visa Type"
+                          >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            {allVisaTypes.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <FormControl
+                          variant="outlined"
+                          className="custom-textfield"
+                        >
+                          <InputLabel id="demo-simple-select-outlined-label">
+                            Country
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={age}
+                            onChange={this.handleSelectChange}
+                            label="Country"
+                          >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            <MenuItem value={10}>Ten</MenuItem>
+                            <MenuItem value={20}>Twenty</MenuItem>
+                            <MenuItem value={30}>Thirty</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
 
-              <Grid container spacing={3}>
-                <Grid item xs={3}>
-                  <FormControl variant="outlined" className="custom-textfield">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Visa Type
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={age}
-                      onChange={this.handleSelectChange}
-                      label="Visa Type"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={3}>
-                  <FormControl variant="outlined" className="custom-textfield">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Country
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={age}
-                      onChange={this.handleSelectChange}
-                      label="Country"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item xs={3}>
-                  <TextField
-                    type="text"
-                    label="City"
-                    variant="outlined"
-                    className="custom-textfield"
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <TextField
-                    type="text"
-                    label="Reason"
-                    variant="outlined"
-                    className="custom-textfield"
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <TextField
-                    type="text"
-                    label="remarks"
-                    variant="outlined"
-                    className="custom-textfield"
-                  />
-                </Grid>
-              </Grid>
+                      <Grid item xs={3}>
+                        <TextField
+                          type="text"
+                          label="City"
+                          variant="outlined"
+                          className="custom-textfield"
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField
+                          type="text"
+                          label="Reason"
+                          variant="outlined"
+                          className="custom-textfield"
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField
+                          type="text"
+                          label="remarks"
+                          variant="outlined"
+                          className="custom-textfield"
+                        />
+                      </Grid>
+                    </Grid>
+                  </>
+                );
+              })}
 
               <Box mt={3}>
                 <Button
