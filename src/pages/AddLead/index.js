@@ -15,7 +15,9 @@ import {
   RadioGroup,
   Radio,
   Button,
+  Snackbar,
 } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider,
@@ -42,18 +44,16 @@ class AddLead extends React.PureComponent {
       listeningScore: "9",
       dateOfBirth: "",
       date: new Date(),
-      sDate: new Date(),
-      open: false,
-      workExpId: "",
+
+      workExpId: "yes",
       isSelected: false,
       firstName: "abhijeet",
       lastName: "singh",
-      dob: "",
       email: "abhi@gmail.com",
       phone: "9999999999",
       address: "qweqweq",
       remarks: "qweqweqwe",
-      workDuration: "9",
+      workDuration: "9 years",
       passportNo: "qweqweq",
       maritalStatus: "yes",
       allCountries: [],
@@ -104,7 +104,7 @@ class AddLead extends React.PureComponent {
           uniBoard: "asd",
         },
       ],
-      sopen: false,
+
       spouseEmail: "asjkdaj@gmail.com",
       spouseFirstName: "aasd",
       spouseLastName: "asdas",
@@ -112,9 +112,12 @@ class AddLead extends React.PureComponent {
       spouseMobileNumber: "1111111111",
       spouseAddress: "asdasd",
       spouseRemarks: "asdasda",
-      spouseWorkexperience: "no",
-      spouseWorkduration: "",
+      spouseWorkexperience: "yes",
+      spouseWorkduration: "2 year",
       spousePassportnumber: "asdasdasd",
+      errorSnack: false,
+      alertMessage: "",
+      errorMessage: "",
     };
   }
 
@@ -127,8 +130,13 @@ class AddLead extends React.PureComponent {
     this.getAllLeadStatus();
   }
 
+  handleClose = (event, reason) => {
+    this.setState({
+      errorSnack: false,
+    });
+  };
+
   addQuifications = () => {
-    console.log("addQuifications");
     let qualificationInputs = [...this.state.qualificationInputs];
     const obj = {
       date: new Date(),
@@ -149,7 +157,6 @@ class AddLead extends React.PureComponent {
   };
 
   removeQualifications = (index) => {
-    console.log("index", index);
     let qualificationInputs = [...this.state.qualificationInputs];
     qualificationInputs.splice(index, 1);
     this.setState({
@@ -179,7 +186,6 @@ class AddLead extends React.PureComponent {
   };
 
   removeVisaInfos = (index) => {
-    console.log("index", index);
     let visaInfos = [...this.state.visaInfos];
     visaInfos.splice(index, 1);
     this.setState({
@@ -190,7 +196,7 @@ class AddLead extends React.PureComponent {
   addRefUsaleses = () => {
     let visaRefusaleses = [...this.state.visaRefusaleses];
     const obj = {
-      refVisaId: "",
+      refVisaID: "",
       refCountry: "",
       refReason: "",
       refRemarks: "",
@@ -206,7 +212,6 @@ class AddLead extends React.PureComponent {
   };
 
   removeRefUsaleses = (index) => {
-    console.log("index", index);
     let visaRefusaleses = [...this.state.visaRefusaleses];
     visaRefusaleses.splice(index, 1);
     this.setState({
@@ -235,7 +240,6 @@ class AddLead extends React.PureComponent {
   };
 
   removeSpouseQualifications = (index) => {
-    console.log("index", index);
     let spouseQualifications = [...this.state.spouseQualifications];
     spouseQualifications.splice(index, 1);
     this.setState({
@@ -254,7 +258,8 @@ class AddLead extends React.PureComponent {
     });
   };
 
-  onSubmit = () => {
+  onSubmit = (event) => {
+    event.preventDefault();
     let {
       visaInfos,
       dateOfBirth,
@@ -300,11 +305,22 @@ class AddLead extends React.PureComponent {
     myHeaders.append("Authorization", "<API Key>");
 
     for (let i = 0; i < userQualifications.length; i++) {
+      console.log("object", userQualifications[i]);
+
       let obj = {};
       obj = userQualifications[i];
+      obj["passingYear"] = moment(obj["date"]).format("YYYY");
       delete obj["date"];
-      delete obj["open"];
       delete obj["uniBoard"];
+    }
+
+    for (let i = 0; i < spouseQualifications.length; i++) {
+      console.log("object", spouseQualifications[i]);
+
+      let obj = {};
+      obj = spouseQualifications[i];
+      obj["passingYear"] = moment(obj["date"]).format("YYYY");
+      delete obj["date"];
     }
 
     for (let i = 0; i < visaInfos.length; i++) {
@@ -331,11 +347,9 @@ class AddLead extends React.PureComponent {
       let obj = {};
       obj = spouseQualifications[i];
       delete obj.date;
-      delete obj.open;
+
       spouseQualifi.push(obj);
     }
-
-    console.log("spouseQualifications state", spouseQualifi);
 
     var raw = JSON.stringify({
       firstName: firstName,
@@ -387,77 +401,87 @@ class AddLead extends React.PureComponent {
       .then((response) => response.text())
       .then((result) => {
         console.log(result);
-        // this.setState({
-        //   overAllScore: "",
-        //   speakingScore: "",
-        //   writingScore: "",
-        //   readingScore: "",
-        //   listeningScore: "",
-        //   dateOfBirth: "",
-        //   workExpId: "",
-        //   firstName: "",
-        //   lastName: "",
-        //   dob: "",
-        //   email: "",
-        //   phone: "",
-        //   address: "",
-        //   remarks: "",
-        //   workDuration: "",
-        //   passportNo: "",
-        //   maritalStatus: "",
-        //   countryId: "",
+        const { Succeeded, Message } = JSON.parse(result);
+        console.log("object", JSON.parse(result));
+        if (Succeeded) {
+          console.log("object", "done");
 
-        //   leadStatusId: "",
-        //   qualificationInputs: [
-        //     {
-        //       date: new Date(),
-        //       open: false,
-        //       qualificationId: "",
-        //       passingYear: "",
-        //       percentage: "",
-        //       uniBoard: "",
-        //       description: "",
-        //     },
-        //   ],
-        //   visaInfos: [
-        //     {
-        //       visaCountry: "",
-        //       visaUniversity: "",
-        //       visaCity: "",
-        //       visaReason: "",
-        //       visaRemarks: "",
-        //       visaId: "",
-        //     },
-        //   ],
-        //   visaRefusaleses: [
-        //     {
-        //       refVisaID: "",
-        //       refCountry: "",
-        //       refReason: "",
-        //       refRemarks: "",
-        //     },
-        //   ],
-        //   spouseQualifications: [
-        //     {
-        //       date: new Date(),
-        //       open: false,
-        //       qualificationId: "",
-        //       passingYear: "",
-        //       percentage: "",
-        //       description: "",
-        //     },
-        //   ],
-        //   spouseEmail: "",
-        //   spouseFirstName: "",
-        //   spouseLastName: "",
-        //   spouseDob: "",
-        //   spouseMobileNumber: "",
-        //   spouseAddress: "",
-        //   spouseRemarks: "",
-        //   spouseWorkexperience: "",
-        //   spouseWorkduration: "",
-        //   spousePassportnumber: "",
-        // });
+          this.setState({
+            errorSnack: true,
+            overAllScore: "",
+            speakingScore: "",
+            writingScore: "",
+            readingScore: "",
+            listeningScore: "",
+            dateOfBirth: "",
+            workExpId: "",
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            address: "",
+            remarks: "",
+            workDuration: "",
+            passportNo: "",
+            maritalStatus: "",
+            countryId: "",
+            leadStatusId: "",
+            leadId: "",
+            qualificationInputs: [
+              {
+                date: new Date(),
+
+                qualificationId: "",
+                passingYear: "",
+                percentage: "",
+                uniBoard: "",
+                description: "",
+              },
+            ],
+            visaInfos: [
+              {
+                visaCountry: "",
+                visaUniversity: "",
+                visaCity: "",
+                visaReason: "",
+                visaRemarks: "",
+                visaId: "",
+              },
+            ],
+            visaRefusaleses: [
+              {
+                refVisaID: "",
+                refCountry: "",
+                refReason: "",
+                refRemarks: "",
+              },
+            ],
+            spouseQualifications: [
+              {
+                date: new Date(),
+                qualificationId: "",
+                passingYear: "",
+                percentage: "",
+                description: "",
+              },
+            ],
+            spouseEmail: "",
+            spouseFirstName: "",
+            spouseLastName: "",
+            spouseDob: "",
+            spouseMobileNumber: "",
+            spouseAddress: "",
+            spouseRemarks: "",
+            spouseWorkexperience: "",
+            spouseWorkduration: "",
+            spousePassportnumber: "",
+          });
+        } else {
+          this.setState({
+            errorMessage: Message,
+            errorSnack: true,
+          });
+        }
       })
       .catch((error) => console.log("error", error));
   };
@@ -582,8 +606,6 @@ class AddLead extends React.PureComponent {
     const {
       selectedDate,
       age,
-      branch,
-      gender,
       qualificationInputs,
       allQualifications,
       spouseQualifications,
@@ -622,7 +644,12 @@ class AddLead extends React.PureComponent {
       visaRefusaleses,
       allLeadsStatus,
       leadStatusId,
+      workDuration,
+      errorSnack,
+      alertMessage,
+      errorMessage,
     } = this.state;
+
     return (
       <ThemeProvider theme={theme}>
         <Box className="container" p={2.5} bgcolor="primary.lightBgContainer">
@@ -786,25 +813,18 @@ class AddLead extends React.PureComponent {
 
               <Grid container spacing={3}>
                 <Grid item xs={3}>
-                  <FormControl variant="outlined" className="custom-textfield">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Work Duration
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={age}
-                      onChange={this.handleSelectChange}
-                      label="workduration"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    type="text"
+                    label="Work Duration"
+                    variant="outlined"
+                    value={workDuration}
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        workDuration: event.target.value,
+                      });
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
@@ -1209,25 +1229,18 @@ class AddLead extends React.PureComponent {
 
               <Grid container spacing={3}>
                 <Grid item xs={3}>
-                  <FormControl variant="outlined" className="custom-textfield">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Work Duration
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={age}
-                      onChange={this.handleSelectChange}
-                      label="workduration"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    type="text"
+                    label="Work Duration"
+                    variant="outlined"
+                    value={spouseWorkduration}
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        spouseWorkduration: event.target.value,
+                      });
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
@@ -1998,6 +2011,22 @@ class AddLead extends React.PureComponent {
               </Box>
             </Box>
           </Paper>
+          <Snackbar
+            autoHideDuration={6000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            open={errorSnack}
+            onClose={this.handleClose}
+          >
+            {errorMessage ? (
+              <Alert onClose={this.handleClose} severity="error">
+                {errorMessage}
+              </Alert>
+            ) : (
+              <Alert onClose={this.handleClose} severity="success">
+                {"Data Successfully Submitted"}
+              </Alert>
+            )}
+          </Snackbar>
         </Box>
       </ThemeProvider>
     );
