@@ -1,44 +1,39 @@
-
 import React from "react";
-import {
-  Paper, Box, Typography
-} from "@material-ui/core";
+import { Paper, Box, Typography, Snackbar } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/core/styles";
-import { theme } from '../../theme/light';
+import { theme } from "../../theme/light";
 
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import {Table, Grid, TextField} from '@material-ui/core';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Toolbar from '@material-ui/core/Toolbar';
-import Checkbox from '@material-ui/core/Checkbox';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
-import Drawer from '@material-ui/core/Drawer';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import CloseIcon from '@material-ui/icons/Close';
+import PropTypes from "prop-types";
+import clsx from "clsx";
+import { makeStyles } from "@material-ui/core/styles";
+import { Table, Grid, TextField } from "@material-ui/core";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TablePagination from "@material-ui/core/TablePagination";
+import TableRow from "@material-ui/core/TableRow";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
+import Toolbar from "@material-ui/core/Toolbar";
+import Checkbox from "@material-ui/core/Checkbox";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import Drawer from "@material-ui/core/Drawer";
+import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
+import CloseIcon from "@material-ui/icons/Close";
 import UserService from "../../services/user.service";
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from "@material-ui/core/styles";
+import Alert from "@material-ui/lab/Alert";
 
-
-
-
-const useStyles = theme=> ({
+const useStyles = (theme) => ({
   root: {
-    width: '100%',
+    width: "100%",
   },
   paper: {
-    width: '100%',
+    width: "100%",
     marginBottom: theme.spacing(2),
   },
   table: {
@@ -46,32 +41,40 @@ const useStyles = theme=> ({
   },
   visuallyHidden: {
     border: 0,
-    clip: 'rect(0 0 0 0)',
+    clip: "rect(0 0 0 0)",
     height: 1,
     margin: -1,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 0,
-    position: 'absolute',
+    position: "absolute",
     top: 20,
     width: 1,
   },
 });
-let rows= [];
+let rows = [];
 
 class AddBranch extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      order:"asc",
-      orderBy:"calories",
-      selected:[],
-      page:0,
-      rowsPerPage:5,
+      order: "asc",
+      orderBy: "calories",
+      selected: [],
+      page: 0,
+      rowsPerPage: 5,
       top: false,
       left: false,
       bottom: false,
       right: false,
-      allBranch:[]
+      allBranch: [],
+      name: "",
+      emailAddress: "",
+      mobileNumber: "",
+      city: "",
+      address: "",
+      description: "",
+      errorSnack: "",
+      errorMessage: "",
     };
   }
 
@@ -79,16 +82,14 @@ class AddBranch extends React.PureComponent {
     this.getAlllead();
   }
 
-   handleRequestSort = (event, property) => {
-    const {
-      orderBy,order
-    } = this.state;
-    const isAsc = orderBy === property && order === 'asc'; 
+  handleRequestSort = (event, property) => {
+    const { orderBy, order } = this.state;
+    const isAsc = orderBy === property && order === "asc";
     this.setState({
-      order:isAsc ? 'desc' : 'asc'
+      order: isAsc ? "desc" : "asc",
     });
     this.setState({
-      orderBy:property
+      orderBy: property,
     });
   };
 
@@ -104,38 +105,30 @@ class AddBranch extends React.PureComponent {
           this.setState({
             allBranch: list,
           });
-          rows=list;
+          rows = list;
         }
-  
       }
     } catch (error) {
       console.log("status error", error);
     }
   };
 
-
-
-   handleSelectAllClick = (event) => {
-     const {allBranch}= this.state;
+  handleSelectAllClick = (event) => {
+    const { allBranch } = this.state;
     if (event.target.checked) {
       const newSelecteds = allBranch.map((n) => n.id);
 
-
       this.setState({
-        selected:newSelecteds
+        selected: newSelecteds,
       });
       return;
     }
-    this.setState({ selected: []});
+    this.setState({ selected: [] });
   };
 
-
-   handleClick = (event, name) => {
-  
-    const {
-      selected
-    } = this.state;
-    console.log(selected)
+  handleClick = (event, name) => {
+    const { selected } = this.state;
+    console.log(selected);
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -148,61 +141,116 @@ class AddBranch extends React.PureComponent {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
+        selected.slice(selectedIndex + 1)
       );
     }
 
     this.setState({
-      selected:newSelected
-    });  
+      selected: newSelected,
+    });
   };
 
-
-   handleChangePage = (event, newPage) => {
-    this.setState({ page: newPage});
+  handleChangePage = (event, newPage) => {
+    this.setState({ page: newPage });
   };
 
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: parseInt(event.target.value, 10) });
 
-
-   handleChangeRowsPerPage = (event) => {
-    this.setState({ rowsPerPage: parseInt(event.target.value, 10)});
-   
-    this.setState({ page: 0});
+    this.setState({ page: 0 });
   };
 
-  
-
-    toggleDrawer = (anchor, open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+  toggleDrawer = (anchor, open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
       return;
     }
     this.setState({ [anchor]: open });
-  
+  };
+
+  submitBranch = async () => {
+    const { name, emailAddress, mobileNumber, city, address, description } =
+      this.state;
+    try {
+      const response = await UserService.SaveBranch(
+        name,
+        emailAddress,
+        mobileNumber,
+        city,
+        address,
+        description
+      );
+      console.log("response of ssssss", response);
+
+      // const { data } = response;
+      // const { data: list, succeeded } = data;
+      // if (succeeded) {
+      //   if (list && list.length) {
+      //     this.setState({
+      //       allBranch: list,
+      //     });
+      //     rows = list;
+      //   }
+      // }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  handleClose = (event, reason) => {
+    this.setState({
+      errorSnack: false,
+    });
   };
 
   render() {
     const { classes } = this.props;
 
-    const { rowsPerPage,page,selected,orderBy,order,allBranch } = this.state;
-     const rows= allBranch;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, allBranch.length - page * rowsPerPage);
+    const {
+      rowsPerPage,
+      page,
+      selected,
+      orderBy,
+      order,
+      allBranch,
+      name,
+      emailAddress,
+      mobileNumber,
+      city,
+      address,
+      description,
+      errorSnack,
+      errorMessage,
+    } = this.state;
+    const rows = allBranch;
+    const emptyRows =
+      rowsPerPage -
+      Math.min(rowsPerPage, allBranch.length - page * rowsPerPage);
 
-   const isSelected = (id) => selected.indexOf(id) !== -1;
+    const isSelected = (id) => selected.indexOf(id) !== -1;
     const list = (anchor) => (
       <Box className="share-steps" height="100%">
-      <Box   display="flex"
+        <Box
+          display="flex"
           width="100%"
           height="100%"
           flexDirection="column"
           bgcolor="primary.drawerBg"
-        className={clsx(classes.list, {
-          [classes.fullList]: anchor === 'top' || anchor === 'bottom',
-        })}
-        role="presentation"
-      
-      >
-        <Box className="common-content" position="relative" height="100%">
-            <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
+          className={clsx(classes.list, {
+            [classes.fullList]: anchor === "top" || anchor === "bottom",
+          })}
+          role="presentation"
+        >
+          <Box className="common-content" position="relative" height="100%">
+            <Box
+              className="sidebar-header"
+              display="flex"
+              alignItems="center"
+              px={3}
+              py={2.4}
+            >
               <Box color="text.textBlue">
                 <Typography variant="h6" gutterBottom color="inherit">
                   Edit
@@ -213,172 +261,360 @@ class AddBranch extends React.PureComponent {
                 display="flex"
                 alignItems="center"
                 color="grey.500"
-                onClick={this.toggleDrawer(anchor, false)}>
+                onClick={this.toggleDrawer(anchor, false)}
+              >
                 <CloseIcon color="inherit" />
               </Box>
             </Box>
             <Divider />
-  
-            <Box className="share-sidebar-content share-mamber-content" p={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
+
+            <Box
+              className="share-sidebar-content share-mamber-content"
+              p={3}
+              pa
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="Name"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        name: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="Email Address"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        emailAddress: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="Mobile Number"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        mobileNumber: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="City"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        city: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="Address"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        address: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="text"
+                    label="Description"
+                    variant="outlined"
+                    className="custom-textfield"
+                    onChange={(event) => {
+                      this.setState({
+                        description: event.target.value,
+                      });
+                    }}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
-              </Grid>
-            </Grid>
-  
-              <Box>
-              
+
+              <Box></Box>
+            </Box>
+
+            <Box
+              className="sidebar-footer"
+              position="absolute"
+              bottom="0"
+              left="0"
+              width="100%"
+              minHeight="82px"
+              px={3}
+              py={1.5}
+              display="flex"
+              alignItems="center"
+              boxSizing="border-box"
+              bgcolor="primary.drawerBg"
+            >
+              <Box pr={1} width="150px" boxSizing="border-box">
+                <Button
+                  variant="outlined"
+                  className="cancel-button"
+                  disableElevation
+                  size="large"
+                  onClick={this.toggleDrawer(anchor, false)}
+                >
+                  Cancel
+                </Button>
+              </Box>
+              <Box width="150px" boxSizing="border-box">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="next-button"
+                  disableElevation
+                  size="large"
+                  onClick={() => {
+                    console.log("object", "called");
+                    if (!name.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the name",
+                      });
+                    } else if (!emailAddress.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the email",
+                      });
+                    } else if (!mobileNumber.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the mobile number",
+                      });
+                    } else if (!address.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the address",
+                      });
+                    } else if (!city.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the city",
+                      });
+                    } else if (!description.trim()) {
+                      this.setState({
+                        errorSnack: true,
+                        errorMessage: "please enter the description",
+                      });
+                    } else {
+                      this.submitBranch();
+                    }
+                  }}
+                >
+                  Update
+                </Button>
               </Box>
             </Box>
-  
-            <Box
-            className="sidebar-footer"
-            position="absolute"
-            bottom="0"
-            left="0"
-            width="100%"
-            minHeight="82px"
-            px={3}
-            py={1.5}
-            display="flex"
-            alignItems="center"
-            boxSizing="border-box"
-            bgcolor="primary.drawerBg">
-            <Box  pr={1} width="150px" boxSizing="border-box">
-              <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={this.toggleDrawer(anchor, false)}>
-                Cancel
-              </Button>
-            </Box>
-            <Box width="150px" boxSizing="border-box">
-              <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-                Update
-              </Button>
-            </Box>
           </Box>
-          </Box>
+        </Box>
+        <Snackbar
+          autoHideDuration={1000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={errorSnack}
+          onClose={this.handleClose}
+        >
+          {errorMessage ? (
+            <Alert onClose={this.handleClose} severity="error">
+              {errorMessage}
+            </Alert>
+          ) : (
+            <Alert onClose={this.handleClose} severity="success">
+              {"Data Successfully Submitted"}
+            </Alert>
+          )}
+        </Snackbar>
       </Box>
-      </Box>
-  
+
       // Drawer End here
-      )
+    );
     return (
       <ThemeProvider theme={theme}>
-      <Box className="container" p={2.5}  bgcolor="primary.lightBgContainer">
-        <Paper className="content lead-page" >
-          <Box className="page-heading" mb={3}>
-            <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
-              
-              <Typography variant="h6" gutterBottom color="inherit">
-              Branch
-              </Typography>
-              {['right'].map((anchor) => (
-          <React.Fragment key={anchor}>
-            <Button onClick={this.toggleDrawer(anchor, true)}>Add New Branch</Button>
-            <Drawer className="common-sidebar " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false)}>
-              {list(anchor)}
-            </Drawer>
-          </React.Fragment>
-        ))}
+        <Box className="container" p={2.5} bgcolor="primary.lightBgContainer">
+          <Paper className="content lead-page">
+            <Box className="page-heading" mb={3}>
+              <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
+                <Typography variant="h6" gutterBottom color="inherit">
+                  Branch
+                </Typography>
+                {["right"].map((anchor) => (
+                  <React.Fragment key={anchor}>
+                    <Button onClick={this.toggleDrawer(anchor, true)}>
+                      Add New Branch
+                    </Button>
+                    <Drawer
+                      className="common-sidebar "
+                      anchor={anchor}
+                      open={this.state[anchor]}
+                      onClose={this.toggleDrawer(anchor, false)}
+                    >
+                      {list(anchor)}
+                    </Drawer>
+                  </React.Fragment>
+                ))}
+              </Box>
+              <Divider />
             </Box>
-            <Divider />
-          </Box>
-  
-  
-  <div className="data-table">
 
-  
-  <div className={classes.root}>
-        <Paper className={classes.paper} elevation={0}>
-          <EnhancedTableToolbar numSelected={selected.length} />
-          <TableContainer>
-            <Table
-              className={classes.table}
-              aria-labelledby="tableTitle"
-              aria-label="enhanced table"
-            >
-              <EnhancedTableHead
-                classes={classes}
-                numSelected={selected.length}
-                order={order}
-                orderBy={orderBy}
-                onSelectAllClick={this.handleSelectAllClick}
-                onRequestSort={this.handleRequestSort}
-                rowCount={rows.length}
-              />
-              <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((Lead, index) => {
-                    const isItemSelected = isSelected(Lead.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-  
-                    return (
-                      <TableRow
-                        hover
-                        onClick={(event) => this.handleClick(event, Lead.id)}
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={index}
-                        selected={isItemSelected}
-                      >
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
-                          />
-                        </TableCell>
-                        <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {Lead.name}
-                        </TableCell>
-                        <TableCell align="left">{Lead.emailAddress}</TableCell>
-                        <TableCell align="left">{Lead.mobileNumber}</TableCell>
-                        <TableCell align="left">{Lead.city}</TableCell>
-                        <TableCell align="left">{Lead.description}</TableCell>
-                        
-                        <TableCell align="left">
-  <Box display="inline-flex" alignItems="center" ml="auto">
-    <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-      <EditIcon style={{ fontSize: 18 }} color="inherit" />
-      </Box>
-      <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-      <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
-      </Box>
-  </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                {emptyRows > 0 && (
-                  <TableRow >
-                    <TableCell colSpan={6} />
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={allBranch.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={this.handleChangePage}
-            onRowsPerPageChange={this.handleChangeRowsPerPage}
-          />
-        </Paper>
-       
-      </div>
-  </div>
-  
-  {/* Drawer Map here */}
-  {/* <div>
+            <div className="data-table">
+              <div className={classes.root}>
+                <Paper className={classes.paper} elevation={0}>
+                  <EnhancedTableToolbar numSelected={selected.length} />
+                  <TableContainer>
+                    <Table
+                      className={classes.table}
+                      aria-labelledby="tableTitle"
+                      aria-label="enhanced table"
+                    >
+                      <EnhancedTableHead
+                        classes={classes}
+                        numSelected={selected.length}
+                        order={order}
+                        orderBy={orderBy}
+                        onSelectAllClick={this.handleSelectAllClick}
+                        onRequestSort={this.handleRequestSort}
+                        rowCount={rows.length}
+                      />
+                      <TableBody>
+                        {stableSort(rows, getComparator(order, orderBy))
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((Lead, index) => {
+                            const isItemSelected = isSelected(Lead.id);
+                            const labelId = `enhanced-table-checkbox-${index}`;
+
+                            return (
+                              <TableRow
+                                hover
+                                onClick={(event) =>
+                                  this.handleClick(event, Lead.id)
+                                }
+                                role="checkbox"
+                                aria-checked={isItemSelected}
+                                tabIndex={-1}
+                                key={index}
+                                selected={isItemSelected}
+                              >
+                                <TableCell padding="checkbox">
+                                  <Checkbox
+                                    checked={isItemSelected}
+                                    inputProps={{ "aria-labelledby": labelId }}
+                                  />
+                                </TableCell>
+                                <TableCell
+                                  component="th"
+                                  id={labelId}
+                                  scope="row"
+                                  padding="none"
+                                >
+                                  {Lead.name}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {Lead.emailAddress}
+                                </TableCell>
+                                <TableCell align="left">
+                                  {Lead.mobileNumber}
+                                </TableCell>
+                                <TableCell align="left">{Lead.city}</TableCell>
+                                <TableCell align="left">
+                                  {Lead.description}
+                                </TableCell>
+
+                                <TableCell align="left">
+                                  <Box
+                                    display="inline-flex"
+                                    alignItems="center"
+                                    ml="auto"
+                                  >
+                                    <Box
+                                      className="edit-icon cursor-pointer"
+                                      mr={1}
+                                      bgcolor="primary.primaryIconBg"
+                                      color="text.textSecondary"
+                                      width="27px"
+                                      height="27px"
+                                      borderRadius="5px"
+                                      display="flex"
+                                      alignItems="center"
+                                      justifyContent="center"
+                                    >
+                                      <EditIcon
+                                        style={{ fontSize: 18 }}
+                                        color="inherit"
+                                      />
+                                    </Box>
+                                    <Box
+                                      className="edit-icon cursor-pointer"
+                                      bgcolor="error.lightIcon"
+                                      color="error.dark"
+                                      width="27px"
+                                      height="27px"
+                                      borderRadius="5px"
+                                      display="flex"
+                                      alignItems="center"
+                                      justifyContent="center"
+                                    >
+                                      <DeleteIcon
+                                        style={{ fontSize: 18 }}
+                                        color="inherit"
+                                      />
+                                    </Box>
+                                  </Box>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        {emptyRows > 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} />
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={allBranch.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={this.handleChangePage}
+                    onRowsPerPageChange={this.handleChangeRowsPerPage}
+                  />
+                </Paper>
+              </div>
+            </div>
+
+            {/* Drawer Map here */}
+            {/* <div>
         {['right'].map((anchor) => (
           <React.Fragment key={anchor}>
             <Button onClick={this.toggleDrawer(anchor, true)}>{anchor}</Button>
@@ -388,20 +624,18 @@ class AddBranch extends React.PureComponent {
           </React.Fragment>
         ))}
       </div> */}
-  
-      {/* Drawer Map here */}
-        </Paper>
-      </Box>
-    </ThemeProvider>
+
+            {/* Drawer Map here */}
+          </Paper>
+        </Box>
+      </ThemeProvider>
     );
   }
 }
 
-export default withStyles(useStyles)(AddBranch)
-
+export default withStyles(useStyles)(AddBranch);
 
 // export default Leads;
-
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -414,8 +648,8 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
-  console.log("getComparator",order)
-  return order === 'desc'
+  console.log("getComparator", order);
+  return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
@@ -431,19 +665,34 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: false, label: ' Name' },
-  { id: 'emailAddress', numeric: false, disablePadding: false, label: 'Mobile Number' },
-  { id: 'mobileNumber', numeric: false, disablePadding: false, label: 'city' },
-  { id: 'city', numeric: false, disablePadding: false, label: 'Email' },
-  { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
-  { id: 'Action', numeric: false, disablePadding: false, label: 'Action' }
+  { id: "name", numeric: false, disablePadding: false, label: " Name" },
+  {
+    id: "emailAddress",
+    numeric: false,
+    disablePadding: false,
+    label: "Mobile Number",
+  },
+  { id: "mobileNumber", numeric: false, disablePadding: false, label: "city" },
+  { id: "city", numeric: false, disablePadding: false, label: "Email" },
+  {
+    id: "description",
+    numeric: false,
+    disablePadding: false,
+    label: "Description",
+  },
+  { id: "Action", numeric: false, disablePadding: false, label: "Action" },
 ];
 
-
-
-
 function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const {
+    classes,
+    onSelectAllClick,
+    order,
+    orderBy,
+    numSelected,
+    rowCount,
+    onRequestSort,
+  } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -456,25 +705,25 @@ function EnhancedTableHead(props) {
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all desserts' }}
+            inputProps={{ "aria-label": "select all desserts" }}
           />
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
+            align={headCell.numeric ? "right" : "left"}
+            padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
+              direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
                 <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
                 </span>
               ) : null}
             </TableSortLabel>
@@ -490,11 +739,10 @@ EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  order: PropTypes.oneOf(["asc", "desc"]).isRequired,
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
 };
-
 
 const useToolbarStyles = makeStyles((theme) => ({
   root: {
@@ -502,7 +750,7 @@ const useToolbarStyles = makeStyles((theme) => ({
     paddingRight: theme.spacing(1),
   },
   highlight:
-    theme.palette.type === 'light'
+    theme.palette.type === "light"
       ? {
           color: theme.palette.primary.light,
           // backgroundColor: lighten(theme.palette.primary.light, 0.85),
@@ -512,7 +760,7 @@ const useToolbarStyles = makeStyles((theme) => ({
           // backgroundColor: theme.palette.primary.dark,
         },
   title: {
-    flex: '1 1 100%',
+    flex: "1 1 100%",
   },
 }));
 
@@ -527,13 +775,21 @@ const EnhancedTableToolbar = (props) => {
       })}
     >
       {numSelected > 0 ? (
-        <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
+        <Typography
+          className={classes.title}
+          color="inherit"
+          variant="subtitle1"
+          component="div"
+        >
           {numSelected} selected
         </Typography>
       ) : (
-        <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          
-        </Typography>
+        <Typography
+          className={classes.title}
+          variant="h6"
+          id="tableTitle"
+          component="div"
+        ></Typography>
       )}
 
       {numSelected > 0 ? (

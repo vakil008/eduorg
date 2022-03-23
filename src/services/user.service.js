@@ -8,20 +8,18 @@ const singin = async (email, password) => {
       email,
       password,
     };
-    const res = await Api(login,false, method, body);
+    const res = await Api(login, false, method, body);
     return res;
   } catch (error) {
     return error;
   }
 };
 
-
-
 const GetAllQualification = async () => {
   try {
     const { all_qualifications } = endPoints;
 
-    const res = await Api(all_qualifications,false);
+    const res = await Api(all_qualifications, false);
     return res;
   } catch (error) {
     return error;
@@ -32,7 +30,7 @@ const GetAllCountry = async () => {
   try {
     const { all_countries } = endPoints;
 
-    const res = await Api(all_countries,false);
+    const res = await Api(all_countries, false);
     return res;
   } catch (error) {
     return error;
@@ -43,7 +41,7 @@ const GetAllVisaTypes = async () => {
   try {
     const { all_visa_type } = endPoints;
 
-    const res = await Api(all_visa_type,false);
+    const res = await Api(all_visa_type, false);
     return res;
   } catch (error) {
     return error;
@@ -54,7 +52,7 @@ const GetAllLeadSource = async () => {
   try {
     const { all_lead_source } = endPoints;
 
-    const res = await Api(all_lead_source,false);
+    const res = await Api(all_lead_source, false);
     return res;
   } catch (error) {
     return error;
@@ -65,7 +63,7 @@ const GetAllBranch = async () => {
   try {
     const { all_branches } = endPoints;
 
-    const res = await Api(all_branches,false);
+    const res = await Api(all_branches, false);
     return res;
   } catch (error) {
     return error;
@@ -76,7 +74,7 @@ const GetAllLeadsStatus = async () => {
   try {
     const { all_leads_status } = endPoints;
 
-    const res = await Api(all_leads_status,false);
+    const res = await Api(all_leads_status, false);
     return res;
   } catch (error) {
     return error;
@@ -87,7 +85,34 @@ const GetAllLead = async () => {
   try {
     const { all_leads } = endPoints;
 
-    const res = await Api(all_leads,true);
+    const res = await Api(all_leads, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const SaveBranch = async (
+  name,
+  emailAddress,
+  mobileNumber,
+  city,
+  address,
+  description
+) => {
+  const method = "POST";
+  let body = {
+    name,
+    emailAddress,
+    mobileNumber,
+    city,
+    address,
+    description,
+  };
+  try {
+    const { save_branch } = endPoints;
+
+    const res = await Api(save_branch, true, method, body);
     return res;
   } catch (error) {
     return error;
@@ -102,6 +127,7 @@ const UserService = {
   GetAllLeadSource,
   GetAllBranch,
   GetAllLeadsStatus,
-  GetAllLead
+  GetAllLead,
+  SaveBranch,
 };
 export default UserService;

@@ -13,4 +13,5 @@ export const endPoints = {
   all_leads_status: `${middlePoints}/v1/Settings/GetAllLeadsStatus`,
   all_leads: `${middlePoints}/v1/Leads`,
 
+  save_branch: `${middlePoints}/v1/Settings/SaveBranch`,
 };
