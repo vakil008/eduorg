@@ -33,7 +33,13 @@ const { mainDomain } = appConfig;
     return response;
   } catch (error) {
     if (error.response !== undefined) {
-      const errObj = error.response.body;
+      const errObj = error.response;
+      const {status } = error.response;
+      if(status==401){
+        localStorage.removeItem("persist:persist-root");
+        window.location.assign('/login');
+      }
+
       return errObj; // return success to frontend
     }
     return error;

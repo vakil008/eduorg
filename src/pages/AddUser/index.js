@@ -1,8 +1,11 @@
 
 import React from "react";
 import {
-  Paper, Box, Typography
+  Paper, Box, Typography,FormControl,InputLabel ,OutlinedInput,InputAdornment,Select,MenuItem
 } from "@material-ui/core";
+
+
+
 import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from '../../theme/light';
 
@@ -30,7 +33,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import UserService from "../../services/user.service";
 import { withStyles } from '@material-ui/core/styles';
 
-
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 
 const useStyles = theme=> ({
@@ -71,7 +75,16 @@ class AddUser extends React.PureComponent {
       left: false,
       bottom: false,
       right: false,
-      allBranch:[]
+      allBranch:[],
+      BranchId:"None",
+      firstName: "",
+      lastName: "",
+      userName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      roles: "",
+      showPassword:false
     };
   }
 
@@ -183,12 +196,12 @@ class AddUser extends React.PureComponent {
   render() {
     const { classes } = this.props;
 
-    const { rowsPerPage,page,selected,orderBy,order,allBranch } = this.state;
+    const { rowsPerPage,page,selected,orderBy,order,allBranch ,BranchId} = this.state;
      const rows= allBranch;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, allBranch.length - page * rowsPerPage);
 
    const isSelected = (id) => selected.indexOf(id) !== -1;
-    const list = (anchor) => (
+    const list = (anchor,BranchId,allBranch) => (
       <Box className="share-steps" height="100%">
       <Box   display="flex"
           width="100%"
@@ -205,7 +218,7 @@ class AddUser extends React.PureComponent {
             <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
               <Box color="text.textBlue">
                 <Typography variant="h6" gutterBottom color="inherit">
-                  Edit
+                  Add and Update
                 </Typography>
               </Box>
               <Box
@@ -219,16 +232,154 @@ class AddUser extends React.PureComponent {
             </Box>
             <Divider />
   
-            <Box className="share-sidebar-content share-mamber-content" p={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
+            <Box className="share-sidebar-content share-mamber-content register-container" p={3}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField label="First Name" 
+                   onChange={(event) => {
+                    this.setState({
+                      firstName: event.target.value,
+                    });
+                  }}
+                variant="outlined" className="custom-textfield" />
               </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
+              <Grid item xs={12}>
+                <TextField label="Last Name" variant="outlined"
+                   onChange={(event) => {
+                    this.setState({
+                      lastName: event.target.value,
+                    });
+                  }}
+                className="custom-textfield" />
               </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
+
+             
+
+              <Grid item xs={12}>
+                <TextField type="email" label="Email Address" variant="outlined" 
+                   onChange={(event) => {
+                    this.setState({
+                      email: event.target.value,
+                    });
+                  }}
+                className="custom-textfield" />
+              </Grid>
+
+              <Grid item xs={12}>
+                  <FormControl variant="outlined" className="custom-textfield">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                    Branch
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      
+                      onChange={(event) => {
+                        if (event.target.value) {
+                          this.setState({
+                            BranchId: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            BranchId: "",
+                          });
+                        }
+                      }}
+                      label="Branch"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {allBranch.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.name}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                
+              <Grid item xs={12}>
+                  <FormControl variant="outlined" className="custom-textfield">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                      Role
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      onChange={(event) => {
+                        if (event.target.value) {
+                          this.setState({
+                            roles: event.target.value,
+                          });
+                        } else {
+                          this.setState({
+                            roles: "",
+                          });
+                        }
+                      }}
+                    
+                      label="Role"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      <MenuItem value="SuperAdmin">
+                        <em>SuperAdmin</em>
+                      </MenuItem>
+                      <MenuItem value="Admin">
+                        <em>Admin</em>
+                      </MenuItem>
+                      <MenuItem value="Basic">
+                        <em>Basic</em>
+                      </MenuItem>
+                     
+                     
+                      
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+              <Grid item xs={12}>
+                <FormControl variant="outlined">
+                  <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-password"
+                    type={this.state.showPassword ? 'text' : 'password'}
+                    value={this.state.password}
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        this.setState({
+                          password: event.target.value,
+                        });
+                      } else {
+                        this.setState({
+                          password: "",
+                        });
+                      }
+                    }}
+                    className="custom-textfield"
+                    autoComplete="off"
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => {
+                            this.setState({
+                              showPassword: !this.state.showPassword
+                            });
+                          }}
+                          edge="end">
+                        {this.state.showPassword ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    labelWidth={70}
+                  />
+                </FormControl>
               </Grid>
             </Grid>
   
@@ -257,7 +408,7 @@ class AddUser extends React.PureComponent {
             </Box>
             <Box width="150px" boxSizing="border-box">
               <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-                Update
+                Save
               </Button>
             </Box>
           </Box>
@@ -281,7 +432,7 @@ class AddUser extends React.PureComponent {
           <React.Fragment key={anchor}>
             <Button onClick={this.toggleDrawer(anchor, true)}>Add New User</Button>
             <Drawer className="common-sidebar " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false)}>
-              {list(anchor)}
+              {list(anchor,BranchId,allBranch)}
             </Drawer>
           </React.Fragment>
         ))}

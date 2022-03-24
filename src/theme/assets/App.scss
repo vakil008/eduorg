@@ -685,7 +685,7 @@ background-color: rgba(41, 146, 119, 0.08);
   }
 
   .MuiDrawer-paper {
-    width: 800px;
+    width: 450px;
     @include box-shadow(none);
 
     @include breakpoint(md) {
