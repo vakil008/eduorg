@@ -66,13 +66,14 @@ class AddLead extends React.PureComponent {
       allBranch: [],
       branchId: "1",
       allQualifications: [],
+      allUniversities: [],
       qualificationInputs: [
         {
           date: new Date(),
           qualificationId: "1",
           passingYear: "2022",
           percentage: "60",
-          uniBoard: "asd",
+          universityId: "1",
           description: "sadasd",
         },
       ],
@@ -101,7 +102,7 @@ class AddLead extends React.PureComponent {
           passingYear: "2022",
           percentage: "60",
           description: "dasdas",
-          uniBoard: "asd",
+          universityId: "1",
         },
       ],
 
@@ -128,6 +129,7 @@ class AddLead extends React.PureComponent {
     this.getAllVisaTypes();
     this.getAllCountries();
     this.getAllLeadStatus();
+    this.getAllUniversities();
   }
 
   handleClose = (event, reason) => {
@@ -143,7 +145,7 @@ class AddLead extends React.PureComponent {
       qualificationId: "",
       passingYear: "",
       percentage: "",
-      uniBoard: "",
+      universityId: "",
       description: "",
     };
     if (qualificationInputs.length === 5) {
@@ -227,7 +229,7 @@ class AddLead extends React.PureComponent {
       passingYear: "",
       percentage: "",
       description: "",
-      uniBoard: "",
+      universityId: "",
     };
     if (spouseQualifications.length === 5) {
       console.log("you could not add more than 5 qualifications");
@@ -311,7 +313,6 @@ class AddLead extends React.PureComponent {
       obj = userQualifications[i];
       obj["passingYear"] = moment(obj["date"]).format("YYYY");
       delete obj["date"];
-      delete obj["uniBoard"];
     }
 
     for (let i = 0; i < spouseQualifications.length; i++) {
@@ -430,11 +431,10 @@ class AddLead extends React.PureComponent {
             qualificationInputs: [
               {
                 date: new Date(),
-
                 qualificationId: "",
                 passingYear: "",
                 percentage: "",
-                uniBoard: "",
+                universityId: "",
                 description: "",
               },
             ],
@@ -536,6 +536,27 @@ class AddLead extends React.PureComponent {
           if (list && list.length) {
             this.setState({
               allLeadsStatus: list,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  getAllUniversities = async () => {
+    try {
+      const response = await UserService.GetAllUniversity();
+      console.log("response of getAllUniversities", response);
+
+      const { data } = response;
+      if (data) {
+        const { data: list, succeeded } = data;
+        if (succeeded) {
+          if (list && list.length) {
+            this.setState({
+              allUniversities: list,
             });
           }
         }
@@ -648,6 +669,7 @@ class AddLead extends React.PureComponent {
       errorSnack,
       alertMessage,
       errorMessage,
+      allUniversities,
     } = this.state;
 
     return (
@@ -1433,16 +1455,33 @@ class AddLead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={age}
-                            onChange={this.handleSelectChange}
+                            value={spouseQualifications[index]["universityId"]}
+                            onChange={(event) => {
+                              let spouseQualifications = [];
+                              spouseQualifications = [
+                                ...this.state.spouseQualifications,
+                              ];
+                              spouseQualifications[index]["universityId"] =
+                                event.target.value;
+                              this.setState({
+                                spouseQualifications,
+                              });
+                            }}
                             label="University"
                           >
                             <MenuItem value="">
                               <em>None</em>
                             </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            {allUniversities.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
+                              );
+                            })}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -1625,16 +1664,33 @@ class AddLead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={age}
-                            onChange={this.handleSelectChange}
+                            value={qualificationInputs[index]["universityId"]}
+                            onChange={(event) => {
+                              let qualificationInputs = [];
+                              qualificationInputs = [
+                                ...this.state.qualificationInputs,
+                              ];
+                              qualificationInputs[index]["universityId"] =
+                                event.target.value;
+                              this.setState({
+                                qualificationInputs,
+                              });
+                            }}
                             label="University"
                           >
                             <MenuItem value="">
                               <em>None</em>
                             </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            {allUniversities.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
+                              );
+                            })}
                           </Select>
                         </FormControl>
                       </Grid>
@@ -2012,7 +2068,7 @@ class AddLead extends React.PureComponent {
             </Box>
           </Paper>
           <Snackbar
-            autoHideDuration={6000}
+            autoHideDuration={3000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
             open={errorSnack}
             onClose={this.handleClose}

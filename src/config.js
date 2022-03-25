@@ -10,6 +10,7 @@ export const endPoints = {
   all_visa_type: `${middlePoints}/v1/Settings/GetAllVisaTypes`,
   all_lead_source: `${middlePoints}/v1/Settings/GetAllLeadSource`,
   all_qualifications: `${middlePoints}/v1/Settings/GetAllQualification`,
+  all_universities: `${middlePoints}/v1/Settings/GetAllUniversity`,
   all_leads_status: `${middlePoints}/v1/Settings/GetAllLeadsStatus`,
   all_leads: `${middlePoints}/v1/Leads`,
 

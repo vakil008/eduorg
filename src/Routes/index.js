@@ -10,7 +10,6 @@ import AddLead from "../pages/AddLead";
 import LeadsStatus from "../pages/LeadsStatus";
 import Qualification from "../pages/Qualification";
 
-
 import AddBranch from "../pages/AddBranch";
 import "../../src/theme/assets/App.scss";
 import Register from "../pages/Login/register";
@@ -29,8 +28,6 @@ const AppRouter = () => {
         <Route path="/branch" element={<AddBranch />} />
         <Route path="/leadsStatus" element={<LeadsStatus />} />
         <Route path="/qualification" element={<Qualification />} />
-      
-
       </Route>
     </Routes>
   );

@@ -92,6 +92,17 @@ const GetAllLead = async () => {
   }
 };
 
+const GetAllUniversity = async () => {
+  try {
+    const { all_universities } = endPoints;
+
+    const res = await Api(all_universities, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 const SaveBranch = async (
   name,
   emailAddress,
@@ -129,5 +140,6 @@ const UserService = {
   GetAllLeadsStatus,
   GetAllLead,
   SaveBranch,
+  GetAllUniversity,
 };
 export default UserService;
