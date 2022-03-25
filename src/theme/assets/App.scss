@@ -770,3 +770,108 @@ background-color: rgba(41, 146, 119, 0.08);
 
 
 }
+
+
+.common-sidebar-big {
+  &.MuiDrawer-root {
+    @include breakpoint(md) {
+      z-index: 999999 !important;
+      height: calc(100% - 62px);
+      top: 0 !important;
+    }
+  }
+  &.meet-sidebar {
+    &.MuiDrawer-root {
+      @include breakpoint(md) {
+        z-index: 999999 !important;
+        height: 100%;
+      }
+    }
+  }
+
+  .MuiDrawer-paper {
+    width: 70%;
+    @include box-shadow(none);
+
+    @include breakpoint(md) {
+      width: 100%;
+      top: auto;
+      height: auto;
+    }
+    &.MuiDrawer-paperAnchorRight {
+      bottom: 0;
+      top: auto;
+    }
+  }
+  .MuiBackdrop-root {
+    background: rgba(0, 0, 0, 0.38);
+  }
+  .sidebar-header {
+    .MuiTypography-h6 {
+      @include margin-padding(all, 0, all, null);
+      font-size: 1.125rem;
+    }
+    &.MuiBox-root {
+      @include breakpoint(sm) {
+        @include margin-padding(all, null, all, 19.2px 16px);
+      }
+    }
+  }
+  .detail-header {
+    &.MuiBox-root {
+      @include breakpoint(sm) {
+        @include margin-padding(all, null, all, 18.4px 16px);
+      }
+    }
+  }
+  .close-drawer {
+    margin-left: auto;
+  }
+  .MuiAlert-root {
+    @include border-radius(0);
+    @include margin-padding(all, null, all, 6px 32px);
+    line-height: 1.313rem;
+    @include breakpoint(md) {
+      @include margin-padding(all, null, all, 6px 16px);
+    }
+  }
+  &.share-step-2 {
+    .MuiDrawer-paper {
+      @include breakpoint(md) {
+        height: 100% !important;
+        &.MuiDrawer-paperAnchorRight {
+          bottom: 0;
+          top: 0;
+        }
+      }
+    }
+    .share-sidebar-content {
+      &.MuiBox-root {
+        @include breakpoint(md) {
+          @include margin-padding(all, null, all, 0);
+          height: calc(100% - 145px);
+        }
+      }
+    }
+  }
+
+  &.share-steps-container {
+    .MuiDrawer-paper {
+      @include breakpoint(md) {
+        height: 100% !important;
+      }
+    }
+    &.group-member-container {
+      .MuiDrawer-paper {
+        @include breakpoint(md) {
+          height: 100% !important;
+        }
+      }
+    }
+  }
+.sidebar-footer {
+  border-top: 1px solid #EEEEEE;
+}
+
+
+}
