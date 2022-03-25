@@ -177,11 +177,9 @@ const UserService = {
   GetAllLeadsStatus,
   GetAllLead,
   SaveBranch,
-<<<<<<< HEAD
   GetAllUniversity,
-=======
   SaveUser,
   GetAllUser
->>>>>>> ca4fec06baf3a86efb78007e7666667a7a001d30
+
 };
 export default UserService;
