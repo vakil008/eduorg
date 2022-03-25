@@ -6,7 +6,7 @@ import { theme } from "../../theme/light";
 import PropTypes from "prop-types";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
-import { Table, Grid, TextField } from "@material-ui/core";
+import { Table, Grid, TextField ,CircularProgress} from "@material-ui/core";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -27,6 +27,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import UserService from "../../services/user.service";
 import { withStyles } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
+
 
 const useStyles = (theme) => ({
   root: {
@@ -75,6 +76,10 @@ class AddBranch extends React.PureComponent {
       description: "",
       errorSnack: "",
       errorMessage: "",
+      isSnack: false,
+      Message: "",
+      isload: false,
+      
     };
   }
 
@@ -173,6 +178,7 @@ class AddBranch extends React.PureComponent {
   submitBranch = async () => {
     const { name, emailAddress, mobileNumber, city, address, description } =
       this.state;
+      this.setState({isload: true});
     try {
       const response = await UserService.SaveBranch(
         name,
@@ -182,8 +188,20 @@ class AddBranch extends React.PureComponent {
         address,
         description
       );
-      console.log("response of ssssss", response);
 
+      console.log("response of ssssss", response);
+      this.setState({
+        isSnack: true,
+        Message: "Successfully Submitted",
+        name: "",
+        emailAddress: "",
+        mobileNumber: "",
+        city: "",
+        address: "",
+        description: "",
+        isload: false
+      });
+      
       // const { data } = response;
       // const { data: list, succeeded } = data;
       // if (succeeded) {
@@ -196,12 +214,19 @@ class AddBranch extends React.PureComponent {
       // }
     } catch (error) {
       console.log("status error", error);
+      this.setState({
+        errorSnack: true,
+        errorMessage: "server error",
+        isload: false
+       
+      });
     }
   };
 
   handleClose = (event, reason) => {
     this.setState({
       errorSnack: false,
+      isSnack: false,
     });
   };
 
@@ -223,6 +248,9 @@ class AddBranch extends React.PureComponent {
       description,
       errorSnack,
       errorMessage,
+      isSnack,
+      Message,
+      isload
     } = this.state;
     const rows = allBranch;
     const emptyRows =
@@ -252,8 +280,9 @@ class AddBranch extends React.PureComponent {
               py={2.4}
             >
               <Box color="text.textBlue">
+                
                 <Typography variant="h6" gutterBottom color="inherit">
-                  Edit
+                  Save and Update
                 </Typography>
               </Box>
               <Box
@@ -269,17 +298,18 @@ class AddBranch extends React.PureComponent {
             <Divider />
 
             <Box
-              className="share-sidebar-content share-mamber-content"
+              className="share-sidebar-content share-mamber-content register-container"
               p={3}
               pa
             >
               <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="Name"
                     variant="outlined"
                     className="custom-textfield"
+                    value={this.state.name}
                     onChange={(event) => {
                       this.setState({
                         name: event.target.value,
@@ -287,10 +317,11 @@ class AddBranch extends React.PureComponent {
                     }}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="Email Address"
+                    value={this.state.emailAddress}
                     variant="outlined"
                     className="custom-textfield"
                     onChange={(event) => {
@@ -300,12 +331,13 @@ class AddBranch extends React.PureComponent {
                     }}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="Mobile Number"
                     variant="outlined"
                     className="custom-textfield"
+                    value={this.state.mobileNumber}
                     onChange={(event) => {
                       this.setState({
                         mobileNumber: event.target.value,
@@ -315,12 +347,13 @@ class AddBranch extends React.PureComponent {
                 </Grid>
               </Grid>
               <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="City"
                     variant="outlined"
                     className="custom-textfield"
+                    value={this.state.city}
                     onChange={(event) => {
                       this.setState({
                         city: event.target.value,
@@ -328,12 +361,13 @@ class AddBranch extends React.PureComponent {
                     }}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="Address"
                     variant="outlined"
                     className="custom-textfield"
+                    value={this.state.address}
                     onChange={(event) => {
                       this.setState({
                         address: event.target.value,
@@ -341,12 +375,13 @@ class AddBranch extends React.PureComponent {
                     }}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <TextField
                     type="text"
                     label="Description"
                     variant="outlined"
                     className="custom-textfield"
+                    value={this.state.description}
                     onChange={(event) => {
                       this.setState({
                         description: event.target.value,
@@ -389,10 +424,11 @@ class AddBranch extends React.PureComponent {
                   variant="contained"
                   color="primary"
                   className="next-button"
+                  disabled={isload}
                   disableElevation
                   size="large"
                   onClick={() => {
-                    console.log("object", "called");
+                  
                     if (!name.trim()) {
                       this.setState({
                         errorSnack: true,
@@ -408,27 +444,13 @@ class AddBranch extends React.PureComponent {
                         errorSnack: true,
                         errorMessage: "please enter the mobile number",
                       });
-                    } else if (!address.trim()) {
-                      this.setState({
-                        errorSnack: true,
-                        errorMessage: "please enter the address",
-                      });
-                    } else if (!city.trim()) {
-                      this.setState({
-                        errorSnack: true,
-                        errorMessage: "please enter the city",
-                      });
-                    } else if (!description.trim()) {
-                      this.setState({
-                        errorSnack: true,
-                        errorMessage: "please enter the description",
-                      });
-                    } else {
+                    }  else {
                       this.submitBranch();
                     }
                   }}
                 >
-                  Update
+                   {isload && <CircularProgress size={16} />}
+                  Save
                 </Button>
               </Box>
             </Box>
@@ -445,9 +467,21 @@ class AddBranch extends React.PureComponent {
               {errorMessage}
             </Alert>
           ) : (
+            ""
+          )}
+        </Snackbar>
+        <Snackbar
+          autoHideDuration={1000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={isSnack}
+          onClose={this.handleClose}
+        >
+          {Message ? (
             <Alert onClose={this.handleClose} severity="success">
-              {"Data Successfully Submitted"}
+              {Message}
             </Alert>
+          ) : (
+            ""
           )}
         </Snackbar>
       </Box>
@@ -485,7 +519,7 @@ class AddBranch extends React.PureComponent {
             <div className="data-table">
               <div className={classes.root}>
                 <Paper className={classes.paper} elevation={0}>
-                  <EnhancedTableToolbar numSelected={selected.length} />
+                
                   <TableContainer>
                     <Table
                       className={classes.table}

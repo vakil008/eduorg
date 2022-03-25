@@ -37,11 +37,13 @@ const { mainDomain } = appConfig;
       const {status } = error.response;
       if(status==401){
         localStorage.removeItem("persist:persist-root");
-        window.location.assign('/login');
+        window.location.assign('/');
       }
+      console.log("return success to frontend",error.response)
 
       return errObj; // return success to frontend
     }
+    console.log("return success to sssss",error)
     return error;
   }
 };

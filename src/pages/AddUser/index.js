@@ -1,7 +1,7 @@
 
 import React from "react";
 import {
-  Paper, Box, Typography,FormControl,InputLabel ,OutlinedInput,InputAdornment,Select,MenuItem
+  Paper, Box, Typography,FormControl,InputLabel ,OutlinedInput,InputAdornment,Select,MenuItem,Snackbar,CircularProgress
 } from "@material-ui/core";
 
 
@@ -32,7 +32,7 @@ import Divider from '@material-ui/core/Divider';
 import CloseIcon from '@material-ui/icons/Close';
 import UserService from "../../services/user.service";
 import { withStyles } from '@material-ui/core/styles';
-
+import Alert from "@material-ui/lab/Alert";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
@@ -76,6 +76,7 @@ class AddUser extends React.PureComponent {
       bottom: false,
       right: false,
       allBranch:[],
+      AllUsers:[],
       BranchId:"None",
       firstName: "",
       lastName: "",
@@ -84,12 +85,19 @@ class AddUser extends React.PureComponent {
       password: "",
       confirmPassword: "",
       roles: "",
-      showPassword:false
+      showPassword:false, 
+      showconfirmPassword:false,
+      errorSnack: "",
+      errorMessage: "",
+      isSnack: false,
+      Message: "",
+      isload: false,
     };
   }
 
   componentDidMount() {
     this.getAlllead();
+    this.getAllUsers();
   }
 
    handleRequestSort = (event, property) => {
@@ -117,6 +125,27 @@ class AddUser extends React.PureComponent {
           this.setState({
             allBranch: list,
           });
+        
+        }
+  
+      }
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
+  getAllUsers =  async () => {
+    try {
+      const response = await UserService.GetAllUser();
+      console.log("response of ssssss", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            AllUsers: list,
+          });
           rows=list;
         }
   
@@ -129,9 +158,9 @@ class AddUser extends React.PureComponent {
 
 
    handleSelectAllClick = (event) => {
-     const {allBranch}= this.state;
+     const {AllUsers}= this.state;
     if (event.target.checked) {
-      const newSelecteds = allBranch.map((n) => n.id);
+      const newSelecteds = AllUsers.map((n) => n.id);
 
 
       this.setState({
@@ -193,15 +222,90 @@ class AddUser extends React.PureComponent {
   
   };
 
+
+  submitBranch = async () => {
+    const { BranchId  , firstName,lastName, email, password, confirmPassword,roles} = this.state;
+      this.setState({isload: true});
+    try {
+       let rolesuser= [roles];
+      let  branch_id=BranchId=="None"? 0 : BranchId;
+      let userName=email;
+      const response = await UserService.SaveUser( firstName,lastName, userName, email, password, confirmPassword,rolesuser,branch_id);
+
+      console.log("response of ssssss", response);
+
+
+      const {status } = response;
+
+      if(status==400){
+       const {data}=response;
+       const {FirstName,ConfirmPassword,Email,LastName,Password,UserName}=data.errors
+       let errorMessage=FirstName?FirstName:(LastName?LastName:(Email?Email:(Password?Password:(ConfirmPassword?ConfirmPassword:""))))
+        
+        this.setState({
+          errorSnack: true,
+          errorMessage: errorMessage,
+          isload: false
+         
+        });
+      }else{
+        this.setState({
+          isSnack: true,
+          Message: "Successfully Submitted",
+          BranchId:"None",
+          firstName: "",
+          lastName: "",
+          userName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          roles: "",
+          isload: false
+        });
+        
+      }
+   
+      // const { data } = response;
+      // const { data: list, succeeded } = data;
+      // if (succeeded) {
+      //   if (list && list.length) {
+      //     this.setState({
+      //       allBranch: list,
+      //     });
+      //     rows = list;
+      //   }
+      // }
+    } catch (error) {
+      console.log("status error", error);
+      this.setState({
+        errorSnack: true,
+        errorMessage: error,
+        isload: false
+       
+      });
+    }
+  };
+
+  handleClose = (event, reason) => {
+    this.setState({
+      errorSnack: false,
+      isSnack: false,
+    });
+  };
+
   render() {
     const { classes } = this.props;
 
-    const { rowsPerPage,page,selected,orderBy,order,allBranch ,BranchId} = this.state;
-     const rows= allBranch;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, allBranch.length - page * rowsPerPage);
+    const { rowsPerPage,page,selected,orderBy,order,allBranch ,BranchId,AllUsers,  errorSnack,
+      errorMessage,
+      isSnack,
+      Message,
+      isload} = this.state;
+     const rows= AllUsers;
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, AllUsers.length - page * rowsPerPage);
 
    const isSelected = (id) => selected.indexOf(id) !== -1;
-    const list = (anchor,BranchId,allBranch) => (
+    const list = (anchor) => (
       <Box className="share-steps" height="100%">
       <Box   display="flex"
           width="100%"
@@ -279,18 +383,14 @@ class AddUser extends React.PureComponent {
                           this.setState({
                             BranchId: event.target.value,
                           });
-                        } else {
-                          this.setState({
-                            BranchId: "",
-                          });
                         }
                       }}
                       label="Branch"
                     >
-                      <MenuItem value="">
+                      <MenuItem value="None">
                         <em>None</em>
                       </MenuItem>
-                      {allBranch.map((data, index) => {
+                      {this.state.allBranch.map((data, index) => {
                         return (
                           <MenuItem key={index.toString()} value={data.id}>
                             {data.name}
@@ -324,7 +424,7 @@ class AddUser extends React.PureComponent {
                     
                       label="Role"
                     >
-                      <MenuItem value="">
+                      <MenuItem value="None">
                         <em>None</em>
                       </MenuItem>
                       <MenuItem value="SuperAdmin">
@@ -381,6 +481,41 @@ class AddUser extends React.PureComponent {
                   />
                 </FormControl>
               </Grid>
+              
+              <Grid item xs={12}>
+                <FormControl variant="outlined">
+                  <InputLabel htmlFor="outlined-adornment-password">Confirm Password</InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-password"
+                    type={this.state.showconfirmPassword ? 'text' : 'password'}
+                    value={this.state.confirmPassword}
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        this.setState({
+                          confirmPassword: event.target.value,
+                        });
+                      } 
+                    }}
+                    className="custom-textfield"
+                    autoComplete="off"
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => {
+                            this.setState({
+                              showconfirmPassword: !this.state.showconfirmPassword
+                            });
+                          }}
+                          edge="end">
+                        {this.state.showconfirmPassword ? <Visibility fontSize="small" /> : <VisibilityOff fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    labelWidth={70}
+                  />
+                </FormControl>
+              </Grid>
             </Grid>
   
               <Box>
@@ -407,13 +542,45 @@ class AddUser extends React.PureComponent {
               </Button>
             </Box>
             <Box width="150px" boxSizing="border-box">
-              <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
+              <Button variant="contained" color="primary"
+                onClick={() =>  this.submitBranch()}
+              disabled={isload}
+              className="next-button" disableElevation size="large">
+              {isload && <CircularProgress size={16} />}
                 Save
               </Button>
             </Box>
           </Box>
           </Box>
       </Box>
+      <Snackbar
+          autoHideDuration={3000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={errorSnack}
+          onClose={this.handleClose}
+        >
+          {errorMessage ? (
+            <Alert onClose={this.handleClose} severity="error">
+              {errorMessage}
+            </Alert>
+          ) : (
+            ""
+          )}
+        </Snackbar>
+        <Snackbar
+          autoHideDuration={3000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={isSnack}
+          onClose={this.handleClose}
+        >
+          {Message ? (
+            <Alert onClose={this.handleClose} severity="success">
+              {Message}
+            </Alert>
+          ) : (
+            ""
+          )}
+        </Snackbar>
       </Box>
   
       // Drawer End here
@@ -432,7 +599,7 @@ class AddUser extends React.PureComponent {
           <React.Fragment key={anchor}>
             <Button onClick={this.toggleDrawer(anchor, true)}>Add New User</Button>
             <Drawer className="common-sidebar " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false)}>
-              {list(anchor,BranchId,allBranch)}
+              {list(anchor)}
             </Drawer>
           </React.Fragment>
         ))}
@@ -486,12 +653,11 @@ class AddUser extends React.PureComponent {
                           />
                         </TableCell>
                         <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {Lead.name}
+                          {Lead.firstName}
                         </TableCell>
-                        <TableCell align="left">{Lead.emailAddress}</TableCell>
-                        <TableCell align="left">{Lead.mobileNumber}</TableCell>
-                        <TableCell align="left">{Lead.city}</TableCell>
-                        <TableCell align="left">{Lead.description}</TableCell>
+                        <TableCell align="left">{Lead.lastName}</TableCell>
+                        <TableCell align="left">{Lead.email}</TableCell>
+                     
                         
                         <TableCell align="left">
   <Box display="inline-flex" alignItems="center" ml="auto">
@@ -517,7 +683,7 @@ class AddUser extends React.PureComponent {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={allBranch.length}
+            count={AllUsers.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={this.handleChangePage}
@@ -582,12 +748,9 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: false, label: ' Name' },
-  { id: 'emailAddress', numeric: false, disablePadding: false, label: 'Mobile Number' },
-  { id: 'mobileNumber', numeric: false, disablePadding: false, label: 'city' },
-  { id: 'city', numeric: false, disablePadding: false, label: 'Email' },
-  { id: 'description', numeric: false, disablePadding: false, label: 'Description' },
-  { id: 'Action', numeric: false, disablePadding: false, label: 'Action' }
+  { id: 'firstName', numeric: false, disablePadding: false, label: 'firstName' },
+  { id: 'lastName', numeric: false, disablePadding: false, label: 'lastName' },
+  { id: 'email', numeric: false, disablePadding: false, label: 'email' }
 ];
 
 
