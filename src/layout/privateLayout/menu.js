@@ -33,15 +33,15 @@ export const menu = [
     title: "Add lead"
   },
   
-  {
-    icon: <DescriptionOutlinedIcon />,
-    to: "/leadsStatus",
-    title: "Leads Status"
-  },
+  // {
+  //   icon: <DescriptionOutlinedIcon />,
+  //   to: "/leadsStatus",
+  //   title: "Leads Status"
+  // },
 
-  {
-    icon: <DescriptionOutlinedIcon />,
-    to: "/qualification",
-    title: "Qualification"
-  }
+  // {
+  //   icon: <DescriptionOutlinedIcon />,
+  //   to: "/qualification",
+  //   title: "Qualification"
+  // }
 ];

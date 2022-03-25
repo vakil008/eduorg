@@ -31,6 +31,8 @@ import UserService from "../../services/user.service";
 import { withStyles } from '@material-ui/core/styles';
 
 
+import Lead from '../Lead';
+
 
 
 const useStyles = theme=> ({
@@ -201,67 +203,7 @@ class Leadss extends React.PureComponent {
         role="presentation"
       
       >
-        <Box className="common-content" position="relative" height="100%">
-            <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
-              <Box color="text.textBlue">
-                <Typography variant="h6" gutterBottom color="inherit">
-                  Edit
-                </Typography>
-              </Box>
-              <Box
-                className="close-drawer cursor-pointer"
-                display="flex"
-                alignItems="center"
-                color="grey.500"
-                onClick={this.toggleDrawer(anchor, false)}>
-                <CloseIcon color="inherit" />
-              </Box>
-            </Box>
-            <Divider />
-  
-            <Box className="share-sidebar-content share-mamber-content" p={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
-              </Grid>
-            </Grid>
-  
-              <Box>
-              
-              </Box>
-            </Box>
-  
-            <Box
-            className="sidebar-footer"
-            position="absolute"
-            bottom="0"
-            left="0"
-            width="100%"
-            minHeight="82px"
-            px={3}
-            py={1.5}
-            display="flex"
-            alignItems="center"
-            boxSizing="border-box"
-            bgcolor="primary.drawerBg">
-            <Box  pr={1} width="150px" boxSizing="border-box">
-              <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={this.toggleDrawer(anchor, false)}>
-                Cancel
-              </Button>
-            </Box>
-            <Box width="150px" boxSizing="border-box">
-              <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-                Update
-              </Button>
-            </Box>
-          </Box>
-          </Box>
+       <Lead />
       </Box>
       </Box>
   
@@ -343,11 +285,15 @@ class Leadss extends React.PureComponent {
                         <TableCell align="center">{Lead.leadsStatus.name}</TableCell>
                         <TableCell align="right">
   <Box display="inline-flex" alignItems="center" ml="auto">
-    <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
+    {/* <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
       <EditIcon style={{ fontSize: 18 }} color="inherit" />
-      </Box>
+      </Box> */}
       <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-      <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
+      <Button onClick={this.toggleDrawer('right', true)}>  <EditIcon style={{ fontSize: 18 }} color="inherit" /></Button>
+    
+            <Drawer className="common-sidebar-big " anchor={'right'} open={this.state['right']} onClose={this.toggleDrawer('right', false)}>
+              {list('right')}
+            </Drawer>
       </Box>
   </Box>
                         </TableCell>
