@@ -130,6 +130,43 @@ const SaveBranch = async (
   }
 };
 
+
+
+const SaveUser = async (
+   firstName,lastName, userName, email, password, confirmPassword,roles,branchId,
+) => {
+  const method = "POST";
+  let body = {
+    branchId,
+     firstName,
+     lastName, 
+     userName,
+      email,
+       password, 
+       confirmPassword,roles
+  };
+  try {
+    const { register } = endPoints;
+
+    const res = await Api(register, true, method, body);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+
+const GetAllUser = async () => {
+  try {
+    const { all_user } = endPoints;
+
+    const res = await Api(all_user, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 const UserService = {
   singin,
   GetAllQualification,
@@ -140,6 +177,11 @@ const UserService = {
   GetAllLeadsStatus,
   GetAllLead,
   SaveBranch,
+<<<<<<< HEAD
   GetAllUniversity,
+=======
+  SaveUser,
+  GetAllUser
+>>>>>>> ca4fec06baf3a86efb78007e7666667a7a001d30
 };
 export default UserService;

@@ -6,6 +6,13 @@ import { Paper, Box, Typography, Menu, MenuItem } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from '../../theme/light'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import Collapse from "@material-ui/core/Collapse";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import {
   AppBar,
@@ -18,6 +25,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import logo from '../../theme/assets/images/inner-logo.png';
 import smallLogo from '../../theme/assets/images/small-logo.png';
 import { useNavigate, Link } from "react-router-dom";
+import { menu } from "./menu";
 
 const AppHeader = (props) => {
   // const opneNavMenu = () => {
@@ -51,6 +59,7 @@ const AppHeader = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   return <>
     <ThemeProvider theme={theme}>
       <Paper square className={ `sidebarNavMenu ${clicked && 'openNavMenu'}` }>
@@ -112,139 +121,7 @@ const AppHeader = (props) => {
           </Box>
 
         </Box>
-        <Box
-         button component={Link} to="/dashboard"
-          p={1}
-          display="flex"
-          color="text.hint"
-          alignItems="center"
-          justifyContent="center"
-          className={'/dashboard' === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}
-          
-
-        >
-          <Box
-            component="span"
-            className="navMenuIcon"
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius={50}
-          >
-            <DashboardIcon color="text" />
-          </Box>
-          <Box component="span" color="text.primary" mt={2} className="menuTextList">
-            <Typography variant="button" display="block" gutterBottom>
-              Dashboard
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-           button component={Link} to="/leads"
-          p={1}
-          display="flex"
-          color="text.hint"
-          alignItems="center"
-          justifyContent="center"
-          className={'/leads' === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}
-        >
-          <Box
-            component="span"
-            className="navMenuIcon"
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius={50}
-          >
-            <DashboardIcon color="text" />
-          </Box>
-          <Box component="span" color="text.primary" mt={2} className="menuTextList">
-            <Typography variant="button" display="block" gutterBottom>
-              Lead
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-           button component={Link} to="/addlead"
-          p={1}
-          display="flex"
-          color="text.hint"
-          alignItems="center"
-          justifyContent="center"
-          className={'/addlead' === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}
-        >
-          <Box
-            component="span"
-            className="navMenuIcon"
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius={50}
-          >
-            <DashboardIcon color="text" />
-          </Box>
-          <Box component="span" color="text.primary" mt={2} className="menuTextList">
-            <Typography variant="button" display="block" gutterBottom>
-            Add lead
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-           button component={Link} to="/addUser"
-          p={1}
-          display="flex"
-          color="text.hint"
-          alignItems="center"
-          justifyContent="center"
-          className={'/addUser' === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}
-        >
-          <Box
-            component="span"
-            className="navMenuIcon"
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius={50}
-          >
-            <DashboardIcon color="text" />
-          </Box>
-          <Box component="span" color="text.primary" mt={2} className="menuTextList">
-            <Typography variant="button" display="block" gutterBottom>
-            Add User
-            </Typography>
-          </Box>
-        </Box>
-        <Box
-           button component={Link} to="/branch"
-          p={1}
-          display="flex"
-          color="text.hint"
-          alignItems="center"
-          justifyContent="center"
-          className={'/branch' === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}
-        >
-          <Box
-            component="span"
-            className="navMenuIcon"
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            borderRadius={50}
-          >
-            <DashboardIcon color="text" />
-          </Box>
-          <Box component="span" color="text.primary" mt={2} className="menuTextList">
-            <Typography variant="button" display="block" gutterBottom>
-            Branch
-            </Typography>
-          </Box>
-        </Box>
-      
+        {menu.map((item, key) => <MenuItm key={key} item={item} />)}
 
       </Paper>
       <div className="appHeader">
@@ -298,3 +175,61 @@ const AppHeader = (props) => {
   </>;
 };
 export default AppHeader;
+
+
+
+const MenuItm = ({ item }) => {
+  return <SingleLevel item={item} />;
+};
+
+const SingleLevel = ({ item }) => {
+  return (
+
+    <Box
+    button component={Link} to={item.to}
+     p={1}
+     display="flex"
+     color="text.hint"
+     alignItems="center"
+     justifyContent="center"
+     className={item.to === window.location.pathname ? 'navMenuActive navMenuList' : 'navMenuList'}     
+   >
+     <Box
+       component="span"
+       className="navMenuIcon"
+       textAlign="center"
+       display="flex"
+       alignItems="center"
+       justifyContent="center"
+       borderRadius={50}
+     >
+      {item.icon}
+     </Box>
+     <Box component="span" color="text.primary" mt={2} className="menuTextList">
+       <Typography variant="button" display="block" gutterBottom>
+       {item.title}
+       </Typography>
+     </Box>
+   </Box>
+  );
+};
+
+
+export function hasChildren(item) {
+  const { items: children } = item;
+
+  if (children === undefined) {
+    return false;
+  }
+
+  if (children.constructor !== Array) {
+    return false;
+  }
+
+  if (children.length === 0) {
+    return false;
+  }
+
+  return true;
+}
+

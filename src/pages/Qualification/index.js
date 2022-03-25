@@ -221,15 +221,22 @@ class Qualification extends React.PureComponent {
   
             <Box className="share-sidebar-content share-mamber-content" p={3}>
             <Grid container spacing={2}>
-              <Grid item xs={4}>
+              <Grid item xs={12}>
                 <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12}>
                 <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12}>
                 <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
               </Grid>
+              <Grid item xs={12}>
+                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
+              </Grid>
+              
             </Grid>
   
               <Box>

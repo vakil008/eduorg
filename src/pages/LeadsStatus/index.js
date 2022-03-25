@@ -295,7 +295,7 @@ class LeadsStatus extends React.PureComponent {
   
   <div className={classes.root}>
         <Paper className={classes.paper} elevation={0}>
-          <EnhancedTableToolbar numSelected={selected.length} />
+         
           <TableContainer>
             <Table
               className={classes.table}

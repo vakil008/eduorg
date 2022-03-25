@@ -33,9 +33,17 @@ const { mainDomain } = appConfig;
     return response;
   } catch (error) {
     if (error.response !== undefined) {
-      const errObj = error.response.body;
+      const errObj = error.response;
+      const {status } = error.response;
+      if(status==401){
+        localStorage.removeItem("persist:persist-root");
+        window.location.assign('/');
+      }
+      console.log("return success to frontend",error.response)
+
       return errObj; // return success to frontend
     }
+    console.log("return success to sssss",error)
     return error;
   }
 };
