@@ -156,11 +156,46 @@ const SaveUser = async (
 };
 
 
+const Saveleadr = async (lead) => {
+ const method = "POST";
+ 
+ try {
+   const { all_save_leads } = endPoints;
+
+   const res = await Api(all_save_leads, true, method, lead);
+   return res;
+ } catch (error) {
+   return error;
+ }
+};
+
 const GetAllUser = async () => {
   try {
     const { all_user } = endPoints;
 
     const res = await Api(all_user, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetLeadbyid = async (id) => {
+  try {
+    const { get_leadbyid } = endPoints;
+
+    const res = await Api(`${get_leadbyid}?id=${id}`, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetUserbyBranchid = async (id) => {
+  try {
+    const { get_user_by_branch } = endPoints;
+
+    const res = await Api(`${get_user_by_branch}?id=${id}`, true);
     return res;
   } catch (error) {
     return error;
@@ -179,7 +214,10 @@ const UserService = {
   SaveBranch,
   GetAllUniversity,
   SaveUser,
-  GetAllUser
+  GetAllUser,
+  GetLeadbyid,
+  Saveleadr,
+  GetUserbyBranchid
 
 };
 export default UserService;

@@ -3,6 +3,7 @@ const Actiontypes = {
   USER_LOGOUT: "USER_LOGOUT",
   SET_NOTIFICATION_COUNTER: "SET_NOTIFICATION_COUNTER",
   SET_USER_TOKEN: "SET_USER_TOKEN",
+  SET_USER_ROLE: "SET_USER_ROLE",
 };
 
 export default Actiontypes;

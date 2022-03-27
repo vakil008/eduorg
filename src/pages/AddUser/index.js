@@ -236,11 +236,17 @@ class AddUser extends React.PureComponent {
 
 
       const {status } = response;
-
+      let errorMessage="";
       if(status==400){
        const {data}=response;
-       const {FirstName,ConfirmPassword,Email,LastName,Password,UserName}=data.errors
-       let errorMessage=FirstName?FirstName:(LastName?LastName:(Email?Email:(Password?Password:(ConfirmPassword?ConfirmPassword:""))))
+       const {errors,Message} =data;
+       if(Message){
+        errorMessage=Message;
+       }else{
+        const {FirstName,ConfirmPassword,Email,LastName,Password,UserName}=errors
+         errorMessage=FirstName?FirstName:(LastName?LastName:(Email?Email:(Password?Password:(ConfirmPassword?ConfirmPassword:(UserName?UserName:"")))))
+       }
+     
         
         this.setState({
           errorSnack: true,

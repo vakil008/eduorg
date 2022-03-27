@@ -19,7 +19,7 @@ import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../theme/light";
 import UserService from "../../services/user.service";
-import { setUserToken } from "../../store/actions/user";
+import { setUserToken,setUserRole } from "../../store/actions/user";
 import { connect } from "react-redux";
 class Login extends React.PureComponent {
   constructor(props) {
@@ -58,8 +58,10 @@ class Login extends React.PureComponent {
       const { data: userData, succeeded } = data;
       console.log("response after login call --> ", response);
       if (succeeded) {
-        const { email, jwToken, userName } = userData;
+        const { email, jwToken, userName,roles } = userData;
         dispatch(setUserToken(jwToken));
+        dispatch(setUserRole(roles));
+
       }
     } catch (error) {
       console.log("status error", error);

@@ -26,466 +26,265 @@ import {
 import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../theme/light";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+
 import moment from "moment";
 import UserService from "../../services/user.service";
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { makeStyles } from "@material-ui/core/styles";
 
 class Lead extends React.PureComponent {
   constructor(props) {
     super(props);
+   
     this.state = {
       selectedDate: new Date(),
-      age: "",
-      branch: "",
-      gender: "female",
-      overAllScore: "9",
-      speakingScore: "9",
-      writingScore: "9",
-      readingScore: "9",
-      listeningScore: "9",
-      dateOfBirth: "",
-      date: new Date(),
-
-      workExpId: "yes",
-      isSelected: false,
-      firstName: "abhijeet",
-      lastName: "singh",
-      email: "abhi@gmail.com",
-      phone: "9999999999",
-      address: "qweqweq",
-      remarks: "qweqweqwe",
-      workDuration: "9 years",
-      passportNo: "qweqweq",
-      maritalStatus: "yes",
+      leaddata:{
+        firstName: null,
+        lastName: null,
+        dateOfBirth: null,
+        emailAddress: null,
+        mobileNumber: null,
+        address: null,
+        remarks: null,
+        workexperience: true,
+        workduration: null,
+        passportnumber: null,
+        branchId: 0,
+        UserId: 0,
+        ismaritalstatus: true,
+        listeningScore: null,
+        readingScore: null,
+        writingScore: null,
+        speakingScore: null,
+        overAllScore: null,
+        countryId: 0,
+        leadSourceId: 0,
+        leadsStatusId: 0,
+        spouse: {
+         
+        },
+        userQualifications: [],
+        userVisaRefusales: [ ],
+        createUserVisa: [ ],
+        
+      },
+      allUniversities:[],
+      allQualifications: [],
       allCountries: [],
-      countryId: "1",
-      allLeads: [],
+      allLeadsSource : [],
       allLeadsStatus: [],
-      leadStatusId: "1",
-      leadId: "1",
       allVisaTypes: [],
       allBranch: [],
-      branchId: "1",
-      allQualifications: [],
-      qualificationInputs: [
-        {
-          date: new Date(),
-          qualificationId: "1",
-          passingYear: "2022",
-          percentage: "60",
-          uniBoard: "asd",
-          description: "sadasd",
-        },
-      ],
-      visaInfos: [
-        {
-          visaCountry: "1",
-          visaUniversity: "",
-          visaCity: "no",
-          visaReason: "asdas",
-          visaRemarks: "asdasd",
-          visaId: "1",
-        },
-      ],
-      visaRefusaleses: [
-        {
-          refVisaID: 1,
-          refCountry: "1",
-          refReason: "sadas",
-          refRemarks: "asdasd",
-        },
-      ],
-      spouseQualifications: [
-        {
-          date: new Date(),
-          qualificationId: "1",
-          passingYear: "2022",
-          percentage: "60",
-          description: "dasdas",
-          uniBoard: "asd",
-        },
-      ],
-
-      spouseEmail: "asjkdaj@gmail.com",
-      spouseFirstName: "aasd",
-      spouseLastName: "asdas",
-      spouseDob: "",
-      spouseMobileNumber: "1111111111",
-      spouseAddress: "asdasd",
-      spouseRemarks: "asdasda",
-      spouseWorkexperience: "yes",
-      spouseWorkduration: "2 year",
-      spousePassportnumber: "asdasdasd",
       errorSnack: false,
+      branchuser:[],
       alertMessage: "",
       errorMessage: "",
+      isload:false,
+      isloader:false,
+      leadId:this.props.leadId
     };
   }
 
   componentDidMount() {
+
     this.getAllBranch();
     this.getAllQualifications();
     this.getAllLeadSource();
     this.getAllVisaTypes();
     this.getAllCountries();
     this.getAllLeadStatus();
+    this.getAllUniversities();
+    if(this.props.leadId){
+        this.getGetLead(this.props.leadId);
+    }
+  
   }
 
   handleClose = (event, reason) => {
     this.setState({
       errorSnack: false,
+      isSnack: false
     });
   };
 
-  addQuifications = () => {
-    let qualificationInputs = [...this.state.qualificationInputs];
-    const obj = {
-      date: new Date(),
-      qualificationId: "",
-      passingYear: "",
-      percentage: "",
-      uniBoard: "",
-      description: "",
-    };
-    if (qualificationInputs.length === 5) {
-      console.log("you could not add more than 5 qualifications");
-    } else {
-      qualificationInputs.push(obj);
+  getGetLead = async (Id) => {
+    try {
+      const response = await UserService.GetLeadbyid(Id);
+
+
+      const { data } = response.data;
+    
+      this.addQuificationsUser(data);
+      
+    } catch (error) {
+      console.log("status error", error);
     }
-    this.setState({
-      qualificationInputs,
-    });
   };
 
-  removeQualifications = (index) => {
-    let qualificationInputs = [...this.state.qualificationInputs];
-    qualificationInputs.splice(index, 1);
-    this.setState({
-      qualificationInputs,
-    });
+  addQuificationsUser = (data) => { 
+    let {leaddata} = this.state;
+    delete data['branch'];
+    let {userQualifications,userVisa,spouseQualifications,userVisaRefusales,spouse}=data;
+    delete data['spouseQualifications'];
+    spouse.spouseQualifications=spouseQualifications;
+     leaddata={ ...leaddata, spouse};
+   let leads ={...leaddata,...data}
+   console.log("response of GetLeadbyid", leads);
+    this.setState({leaddata:leads,isload:false});
+    
   };
+  
 
-  addMoreVisaInfos = () => {
-    let visaInfos = [...this.state.visaInfos];
-    const obj = {
-      visaType: "",
-      visaCountry: "",
-      visaUniversity: "",
-      visaCity: "",
-      visaReason: "",
-      visaRemarks: "",
-      visaId: "",
-    };
-    if (visaInfos.length === 5) {
-      console.log("you could not add more than 5 qualifications");
-    } else {
-      visaInfos.push(obj);
-    }
-    this.setState({
-      visaInfos,
-    });
-  };
-
-  removeVisaInfos = (index) => {
-    let visaInfos = [...this.state.visaInfos];
-    visaInfos.splice(index, 1);
-    this.setState({
-      visaInfos,
-    });
-  };
-
-  addRefUsaleses = () => {
-    let visaRefusaleses = [...this.state.visaRefusaleses];
-    const obj = {
-      refVisaID: "",
-      refCountry: "",
-      refReason: "",
-      refRemarks: "",
-    };
-    if (visaRefusaleses.length == 5) {
-      console.log("you could not add more than 5 qualifications");
-    } else {
-      visaRefusaleses.push(obj);
-    }
-    this.setState({
-      visaRefusaleses,
-    });
-  };
-
-  removeRefUsaleses = (index) => {
-    let visaRefusaleses = [...this.state.visaRefusaleses];
-    visaRefusaleses.splice(index, 1);
-    this.setState({
-      visaRefusaleses,
-    });
-  };
-
+//#region add remove 
   addSpouseQualifications = () => {
-    let spouseQualifications = [...this.state.spouseQualifications];
-    const obj = {
-      date: new Date(),
-      qualificationId: "",
-      passingYear: "",
-      percentage: "",
-      description: "",
-      uniBoard: "",
-    };
-    if (spouseQualifications.length === 5) {
-      console.log("you could not add more than 5 qualifications");
-    } else {
-      spouseQualifications.push(obj);
+    const {leaddata} = this.state;
+    let {spouse}=leaddata;
+    let {spouseQualifications}=spouse;
+    const obj =  {
+      qualificationId: 0,
+      passingYear: null,
+      percentage: null,
+      description: null
     }
-    this.setState({
-      spouseQualifications,
-    });
+    spouseQualifications.push(obj);
+    const leads={ ...leaddata, spouse}
+    this.setState({leaddata:leads});
   };
 
   removeSpouseQualifications = (index) => {
-    let spouseQualifications = [...this.state.spouseQualifications];
+    const {leaddata} = this.state;
+    let {spouse}=leaddata;
+    let {spouseQualifications}=spouse;
+
     spouseQualifications.splice(index, 1);
-    this.setState({
-      spouseQualifications,
-    });
+
+    spouse.spouseQualifications=spouseQualifications;
+    const leads={ ...leaddata, spouse}
+    this.setState({leaddata:leads});
   };
 
-  handleSelectChange = (event) => {
-    this.setState({
-      age: event.target.value,
-    });
+  addQuifications = () => {
+    const {leaddata} = this.state;
+    let {userQualifications}=leaddata;
+    const obj =   {
+      qualificationId: 0,
+      passingYear: null,
+      percentage: null,
+      description: null
+    }
+    userQualifications.push(obj);
+    const leads={ ...leaddata, userQualifications}
+    this.setState({leaddata:leads});
   };
-  handleBranchChange = (event) => {
-    this.setState({
-      branch: event.target.value,
-    });
+
+  removeQualifications = (index) => {
+    const {leaddata} = this.state;
+    let {userQualifications}=leaddata;
+    userQualifications.splice(index, 1);
+    const leads={ ...leaddata, userQualifications}
+    this.setState({leaddata:leads});
   };
 
-  onSubmit = (event) => {
-    event.preventDefault();
-    let {
-      visaInfos,
-      dateOfBirth,
-      workExpId,
-      visaRefusaleses,
-      firstName,
-      lastName,
-      email,
-      phone,
-      address,
-      remarks,
-      workDuration,
-      passportNo,
-      maritalStatus,
-      countryId,
-      readingScore,
-      listeningScore,
-      leadId,
-      writingScore,
-      speakingScore,
-      overAllScore,
-      spouseFirstName,
-      spouseLastName,
-      spouseDob,
-      spouseMobileNumber,
-      spouseAddress,
-      spouseRemarks,
-      spouseWorkexperience,
-      spouseWorkduration,
-      spousePassportnumber,
-      leadStatusId,
-    } = this.state;
-    console.log("state", this.state);
 
-    let spouseQualifications = [...this.state.spouseQualifications];
-    let userQualifications = [...this.state.qualificationInputs];
-
-    let createUserVisa = [];
-    let spouseQualifi = [];
-
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", "<API Key>");
-
-    for (let i = 0; i < userQualifications.length; i++) {
-      console.log("object", userQualifications[i]);
-
-      let obj = {};
-      obj = userQualifications[i];
-      obj["passingYear"] = moment(obj["date"]).format("YYYY");
-      delete obj["date"];
-      delete obj["uniBoard"];
+  addMoreVisaInfos = () => {
+    const {leaddata} = this.state;
+    let {createUserVisa}=leaddata;
+    const obj =  {
+      visaTypeId: 0,
+      countryId: 0,
+      universityId: 0,
+      city: null,
+      reason: null,
+      remarks: null
     }
+    createUserVisa.push(obj);
+    const leads={ ...leaddata, createUserVisa}
+    this.setState({leaddata:leads});
+  };
 
-    for (let i = 0; i < spouseQualifications.length; i++) {
-      console.log("object", spouseQualifications[i]);
+  removeVisaInfos = (index) => {
+    const {leaddata} = this.state;
+    let {createUserVisa}=leaddata;
+    createUserVisa.splice(index, 1);
+    const leads={ ...leaddata, createUserVisa}
+    this.setState({leaddata:leads});
+  };
 
-      let obj = {};
-      obj = spouseQualifications[i];
-      obj["passingYear"] = moment(obj["date"]).format("YYYY");
-      delete obj["date"];
+  addRefUsaleses = () => {
+    const {leaddata} = this.state;
+    let {userVisaRefusales}=leaddata;
+    const obj =  {
+      visaTypeId: 0,
+      countryId: 0,
+      city: null,
+      reason: null,
+      remarks: null
     }
+    userVisaRefusales.push(obj);
+    const leads={ ...leaddata, userVisaRefusales}
+    this.setState({leaddata:leads});
+  };
 
-    for (let i = 0; i < visaInfos.length; i++) {
-      const {
-        visaCountry,
-        visaUniversity,
-        visaCity,
-        visaReason,
-        visaRemarks,
-        visaId,
-      } = visaInfos[i];
+  removeRefUsaleses = (index) => {
+    const {leaddata} = this.state;
+    let {userVisaRefusales}=leaddata;
+    userVisaRefusales.splice(index, 1);
+    const leads={ ...leaddata, userVisaRefusales}
+    this.setState({leaddata:leads});
+  };
 
-      let obj = {};
-      obj["visaTypeId"] = visaId;
-      obj["countryId"] = visaCountry;
-      obj["city"] = visaCity;
-      obj["reason"] = visaReason;
-      obj["remarks"] = visaRemarks;
-      //obj[''] = visaUniversity;
-      createUserVisa.push(obj);
+  addSpouse = () => {
+    const {leaddata} = this.state;
+    let {spouse}=leaddata;
+    if(Object.keys(spouse).length == 0){
+        spouse =  {
+            firstName: null,
+            lastName: null,
+            dateOfBirth: null,
+            mobileNumber: null,
+            address: null,
+            remarks: null,
+            workexperience: true,
+            workduration: null,
+            passportnumber: null,
+            spouseQualifications: []
+        }
+    }else{
+        spouse={};
     }
-    console.log("cheeekkk", spouseQualifications);
-    for (let i = 0; i < spouseQualifications.length; i++) {
-      let obj = {};
-      obj = spouseQualifications[i];
-      delete obj.date;
+  
+   
+    const leads={ ...leaddata, spouse}
+    this.setState({leaddata:leads});
+  };
 
-      spouseQualifi.push(obj);
-    }
+//#endregion
 
-    var raw = JSON.stringify({
-      firstName: firstName,
-      lastName: lastName,
-      DateOfBirth: dateOfBirth,
-      emailAddress: email,
-      mobileNumber: phone,
-      address: address,
-      remarks: remarks,
-      workexperience: workExpId === "yes" ? true : false,
-      workduration: workDuration,
-      passportnumber: passportNo,
-      branchId: 1,
-      ismaritalstatus: maritalStatus === "yes" ? true : false,
-      listeningScore: listeningScore,
-      readingScore: readingScore,
-      writingScore: writingScore,
-      speakingScore: speakingScore,
-      overAllScore: overAllScore,
-      countryId: countryId,
-      leadSourceId: leadId,
-      leadsStatusId: leadStatusId,
-      spouse: {
-        firstName: spouseFirstName,
-        lastName: spouseLastName,
-        DateOfBirth: spouseDob,
-        mobileNumber: spouseMobileNumber,
-        address: spouseAddress,
-        remarks: spouseRemarks,
-        workexperience: spouseWorkexperience === "yes" ? true : false,
-        workduration: spouseWorkduration,
-        passportnumber: spousePassportnumber,
-        spouseQualifications: spouseQualifi,
-      },
-      userQualifications: userQualifications,
-      createUserVisa: createUserVisa,
-      visaRefusaleses: visaRefusaleses,
-    });
-    console.log("rawraw", raw);
+//#region get All data
 
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
 
-    fetch("https://crmleadedu.herokuapp.com/api/v1/Leads", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        console.log(result);
-        const { Succeeded, Message } = JSON.parse(result);
-        console.log("object", JSON.parse(result));
-        if (Succeeded) {
-          console.log("object", "done");
+getAllUniversities = async () => {
+  try {
+    const response = await UserService.GetAllUniversity();
+    console.log("response of getAllUniversities", response);
 
+    const { data } = response;
+    if (data) {
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
           this.setState({
-            errorSnack: true,
-            overAllScore: "",
-            speakingScore: "",
-            writingScore: "",
-            readingScore: "",
-            listeningScore: "",
-            dateOfBirth: "",
-            workExpId: "",
-            firstName: "",
-            lastName: "",
-            email: "",
-            phone: "",
-            address: "",
-            remarks: "",
-            workDuration: "",
-            passportNo: "",
-            maritalStatus: "",
-            countryId: "",
-            leadStatusId: "",
-            leadId: "",
-            qualificationInputs: [
-              {
-                date: new Date(),
-
-                qualificationId: "",
-                passingYear: "",
-                percentage: "",
-                uniBoard: "",
-                description: "",
-              },
-            ],
-            visaInfos: [
-              {
-                visaCountry: "",
-                visaUniversity: "",
-                visaCity: "",
-                visaReason: "",
-                visaRemarks: "",
-                visaId: "",
-              },
-            ],
-            visaRefusaleses: [
-              {
-                refVisaID: "",
-                refCountry: "",
-                refReason: "",
-                refRemarks: "",
-              },
-            ],
-            spouseQualifications: [
-              {
-                date: new Date(),
-                qualificationId: "",
-                passingYear: "",
-                percentage: "",
-                description: "",
-              },
-            ],
-            spouseEmail: "",
-            spouseFirstName: "",
-            spouseLastName: "",
-            spouseDob: "",
-            spouseMobileNumber: "",
-            spouseAddress: "",
-            spouseRemarks: "",
-            spouseWorkexperience: "",
-            spouseWorkduration: "",
-            spousePassportnumber: "",
-          });
-        } else {
-          this.setState({
-            errorMessage: Message,
-            errorSnack: true,
+            allUniversities: list,
           });
         }
-      })
-      .catch((error) => console.log("error", error));
-  };
-
+      }
+    }
+  } catch (error) {
+    console.log("status error", error);
+  }
+};
   getAllQualifications = async () => {
     try {
       const response = await UserService.GetAllQualification();
@@ -524,6 +323,31 @@ class Lead extends React.PureComponent {
     }
   };
 
+  getBranchUser = async (id) => {
+    try {
+      const response = await UserService.GetUserbyBranchid(id);
+      console.log("response of getBranchUser", response);
+
+      const { data } = response;
+      const { data: list, succeeded } = data;
+      if (succeeded) {
+        if (list && list.length) {
+          this.setState({
+            branchuser: list,
+          });
+        }
+        else{
+          this.setState({
+            branchuser: [],
+          });
+        }
+      }
+     
+    } catch (error) {
+      console.log("status error", error);
+    }
+  };
+
   getAllLeadStatus = async () => {
     try {
       const response = await UserService.GetAllLeadsStatus();
@@ -547,6 +371,12 @@ class Lead extends React.PureComponent {
 
   getAllVisaTypes = async () => {
     try {
+      
+      if(this.props.leadId){
+         this.setState({
+            isload: true
+          });
+        }
       const response = await UserService.GetAllVisaTypes();
       console.log("response of getAllVisaTypes", response);
 
@@ -567,14 +397,12 @@ class Lead extends React.PureComponent {
   getAllLeadSource = async () => {
     try {
       const response = await UserService.GetAllLeadSource();
-      console.log("response of getAllLeadSource", response);
-
       const { data } = response;
       const { data: list, succeeded } = data;
       if (succeeded) {
         if (list && list.length) {
           this.setState({
-            allLeads: list,
+            allLeadsSource: list,
           });
         }
       }
@@ -602,85 +430,204 @@ class Lead extends React.PureComponent {
     }
   };
 
+//#endregion
+
+handleSelectChange = (event) => {
+  this.setState({
+    age: event.target.value,
+  });
+};
+handleBranchChange = (event) => {
+  this.setState({
+    branch: event.target.value,
+  });
+};
+
+onSubmit =async (event) => {
+  event.preventDefault();
+  this.setState({isloader: true});
+  let {leaddata}= this.state;
+  let {ismaritalstatus,workexperience,spouse}= leaddata;
+
+  ismaritalstatus= ismaritalstatus=="true"?true:false;
+  workexperience= workexperience=="true"?true:false;
+  if(Object.keys(spouse).length != 0){
+    spouse.workexperience= spouse.workexperience=="true"?true:false;
+    leaddata={...leaddata,spouse};
+  }
+  leaddata={...leaddata,ismaritalstatus};
+  leaddata={...leaddata,workexperience};
+  try {
+    const response = await UserService.Saveleadr(leaddata);
+    const { status,data } = response;
+    if(status==400){
+        const {Message}=data;
+        this.setState({
+            errorSnack: true,
+            errorMessage: Message,
+            isloader: false
+           
+          });
+    }else{
+        this.setState({
+          isSnack: true,
+          Message: "Successfully Submitted",
+          isloader: false
+        });
+        
+      }
+    console.log("response", data);
+  } catch (error) {
+    console.log("status error", error);
+  }
+
+
+};
+
+ handleChange = (prop) => (event) => {
+  const {leaddata}= this.state;
+  console.log(prop)
+   if(prop=="branchId"){
+    this.getBranchUser(event.target.value);
+   }
+  
+  const leads={ ...leaddata, [prop]: event.target.value}
+  this.setState({leaddata:leads});
+};
+
+handleChangeDate = (prop) => (event) => {
+    const {leaddata}= this.state;
+    // let date= moment(event).format("DD-MM-YYYY")
+   const leads={ ...leaddata, [prop]: event}
+   this.setState({leaddata:leads});
+ };
+
+handleChangeRadio = (prop) => (event) => {
+    const {leaddata}= this.state;
+    let radioValue= event.target.value=="yes"?true:false;
+   const leads={ ...leaddata, [prop]: radioValue}
+   this.setState({leaddata:leads});
+ };
+handleChangeSpouse = (prop) => (event) => {
+  const {leaddata}= this.state;
+  let {spouse}=leaddata;
+  spouse={...spouse,[prop]: event.target.value}
+ const leads={ ...leaddata, spouse}
+ this.setState({leaddata:leads});
+};
+
+handleChangeSpouseDate = (prop) => (event) => {
+    const {leaddata}= this.state;
+    let {spouse}=leaddata;
+  
+    spouse={...spouse,[prop]: event}
+    const leads={ ...leaddata, spouse}
+    this.setState({leaddata:leads});
+ };
+
+handleChangeSpouseQualifications = (prop,index) => (event) => {
+  const {leaddata}= this.state;
+  let {spouse}=leaddata;
+  let {spouseQualifications}=spouse
+  let obj
+   if(prop=="passingYear"){
+    let year= moment(event).format("YYYY")
+     obj= {...spouseQualifications[index],[prop]: year};
+    }else{
+        obj= {...spouseQualifications[index],[prop]: event.target.value};
+    }
+ 
+  spouseQualifications[index]=obj;
+  spouse={...spouse,spouseQualifications}
+ const leads={ ...leaddata, spouse}
+ this.setState({leaddata:leads});
+};
+
+handleChangeQualifications = (prop,index) => (event) => {
+    const {leaddata}= this.state;
+    let {userQualifications}=leaddata;
+    let obj
+    if(prop=="passingYear"){
+        let year=moment(event).format("YYYY")
+         obj= {...userQualifications[index],[prop]: year};
+    }else{
+         obj= {...userQualifications[index],[prop]: event.target.value};
+    }
+   
+  
+   userQualifications[index]=obj;
+   const leads={ ...leaddata, userQualifications}
+   this.setState({leaddata:leads});
+  };
+  handleChangeVisa = (prop,index) => (event) => {
+    const {leaddata}= this.state;
+    let {createUserVisa}=leaddata;
+   let obj= {...createUserVisa[index],[prop]: event.target.value};
+   createUserVisa[index]=obj;
+   const leads={ ...leaddata, createUserVisa}
+   this.setState({leaddata:leads});
+  };
+
+
+  handleChangeVisaRefusales = (prop,index) => (event) => {
+    const {leaddata}= this.state;
+    let {userVisaRefusales}=leaddata;
+   let obj= {...userVisaRefusales[index],[prop]: event.target.value};
+   userVisaRefusales[index]=obj;
+   const leads={ ...leaddata, userVisaRefusales}
+   this.setState({leaddata:leads});
+  };
+
+
   render() {
     const {
-      selectedDate,
-      age,
-      qualificationInputs,
-      allQualifications,
-      spouseQualifications,
       allCountries,
       allLeads,
       allVisaTypes,
-      countryId,
-      leadId,
-      visaInfos,
-      email,
-      firstName,
-      lastName,
-      address,
-      phone,
-      dateOfBirth,
-      remarks,
-      spouseDob,
-      passportNo,
+      allUniversities,
       allBranch,
-      branchId,
-      listeningScore,
-      readingScore,
-      writingScore,
-      speakingScore,
-      spouseFirstName,
-      spouseRemarks,
-      spouseEmail,
-      spouseLastName,
-      spouseMobileNumber,
-      spouseAddress,
-      spouseWorkexperience,
-      spouseWorkduration,
-      spousePassportnumber,
-      workExpId,
-      maritalStatus,
-      visaRefusaleses,
       allLeadsStatus,
-      leadStatusId,
-      workDuration,
+      allQualifications,
       errorSnack,
       alertMessage,
+      leaddata,
+      selectedDate,
+      allLeadsSource,
+      isload,
+      isloader,
       errorMessage,
+      Message,
+      isSnack,
+      branchuser
     } = this.state;
-
+ const {spouse}=leaddata;
+    
     return (
-      
+    
+        <React.Fragment>
+             {isload? <LoaderBackdrop isload={isload} />:
+
         <Box className="container" p={2.5}>
-            <Box className="lead-form" px={3} pb={3}>
+           <Box className="lead-form" px={3} pb={3}>
               <Grid container spacing={3}>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="First Name"
-                    value={firstName}
+                    value={leaddata.firstName}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        firstName: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('firstName')}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Last Name"
-                    value={lastName}
+                    value={leaddata.lastName}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        lastName: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('lastName')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -693,12 +640,8 @@ class Lead extends React.PureComponent {
                       margin="normal"
                       id="date-picker-inline"
                       label="Date Of Birth"
-                      value={dateOfBirth ? dateOfBirth : selectedDate}
-                      onChange={(date) => {
-                        this.setState({
-                          dateOfBirth: date,
-                        });
-                      }}
+                      value={leaddata.dateOfBirth || selectedDate}
+                      onChange={this.handleChangeDate('dateOfBirth')}
                       className="custom-datepicker"
                       KeyboardButtonProps={{
                         "aria-label": "change date",
@@ -710,14 +653,10 @@ class Lead extends React.PureComponent {
                   <TextField
                     type="text"
                     label="Email Address"
-                    value={email}
+                    value={leaddata.emailAddress}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        email: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('emailAddress')}
                   />
                 </Grid>
               </Grid>
@@ -726,42 +665,30 @@ class Lead extends React.PureComponent {
                   <TextField
                     type="number"
                     label="Mobile Number"
-                    value={phone}
+                    value={leaddata.mobileNumber}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        phone: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('mobileNumber')}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Address"
-                    value={address}
+                    value={leaddata.address}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        address: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('address')}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="Remarks"
-                    value={remarks}
+                    value={leaddata.remarks}
                     variant="outlined"
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        remarks: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('remarks')}
                   />
                 </Grid>
                 <Grid item xs={3} className="work-experience">
@@ -779,20 +706,16 @@ class Lead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={workExpId}
-                      onChange={(event) => {
-                        this.setState({
-                          workExpId: event.target.value,
-                        });
-                      }}
+                      value={leaddata.workexperience}
+                      onChange={this.handleChange('workexperience')}
                     >
                       <FormControlLabel
-                        value="yes"
+                         value={"true"}
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="no"
+                         value={"false"}
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -807,13 +730,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Work Duration"
                     variant="outlined"
-                    value={workDuration}
+                    value={leaddata.workduration}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        workDuration: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('workduration')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -821,38 +740,30 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Passport Number"
                     variant="outlined"
-                    value={passportNo}
+                    value={leaddata.passportnumber}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        passportNo: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('passportnumber')}
                   />
                 </Grid>
                 <Grid item xs={3}>
                   <FormControl variant="outlined" className="custom-textfield">
                     <InputLabel id="demo-simple-select-outlined-label">
-                      Branch
+                      Country
                     </InputLabel>
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={branchId}
-                      onChange={(event) => {
-                        this.setState({
-                          branchId: event.target.value,
-                        });
-                      }}
-                      label="Branch"
+                      value={leaddata.countryId}
+                      onChange={this.handleChange('countryId')}
+                      label="Country"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {allBranch.map((data, index) => {
+                      {allCountries.map((data, index) => {
                         return (
                           <MenuItem key={index.toString()} value={data.id}>
-                            {data.name}
+                            {data.countryDescription}
                           </MenuItem>
                         );
                       })}
@@ -873,20 +784,16 @@ class Lead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={maritalStatus}
-                      onChange={(event) => {
-                        this.setState({
-                          maritalStatus: event.target.value,
-                        });
-                      }}
+                      value={leaddata.ismaritalstatus}
+                      onChange={this.handleChange('ismaritalstatus')}
                     >
                       <FormControlLabel
-                        value="yes"
+                         value={"true"}
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="no"
+                        value={"false"}
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -901,13 +808,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Listening Score"
                     variant="outlined"
-                    value={listeningScore}
+                    value={leaddata.listeningScore}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        listeningScore: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('listeningScore')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -915,13 +818,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Reading Score"
                     variant="outlined"
-                    value={readingScore}
+                    value={leaddata.readingScore}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        readingScore: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('readingScore')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -929,13 +828,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Writing Score"
                     variant="outlined"
-                    value={writingScore}
+                    value={leaddata.writingScore}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        writingScore: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('writingScore')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -943,54 +838,16 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Speaking Score"
                     variant="outlined"
-                    value={speakingScore}
+                    value={leaddata.speakingScore}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        speakingScore: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChange('speakingScore')}
                   />
                 </Grid>
               </Grid>
 
               <Box mt={1}></Box>
               <Grid container spacing={3}>
-                <Grid item xs={3}>
-                  <FormControl variant="outlined" className="custom-textfield">
-                    <InputLabel id="demo-simple-select-outlined-label">
-                      Country
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-outlined-label"
-                      id="demo-simple-select-outlined"
-                      value={countryId}
-                      onChange={(event) => {
-                        if (event.target.value) {
-                          this.setState({
-                            countryId: event.target.value,
-                          });
-                        } else {
-                          this.setState({
-                            countryId: "",
-                          });
-                        }
-                      }}
-                      label="Country"
-                    >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      {allCountries.map((data, index) => {
-                        return (
-                          <MenuItem key={index.toString()} value={data.id}>
-                            {data.countryDescription}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-                </Grid>
+
                 <Grid item xs={3}>
                   <FormControl variant="outlined" className="custom-textfield">
                     <InputLabel id="demo-simple-select-outlined-label">
@@ -999,24 +856,14 @@ class Lead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={leadId}
-                      onChange={(event) => {
-                        if (event.target.value) {
-                          this.setState({
-                            leadId: event.target.value,
-                          });
-                        } else {
-                          this.setState({
-                            leadId: "",
-                          });
-                        }
-                      }}
+                      value={leaddata.leadSourceId}
+                      onChange={this.handleChange('leadSourceId')}
                       label="Lead Source"
                     >
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {allLeads.map((data, index) => {
+                      {allLeadsSource.map((data, index) => {
                         return (
                           <MenuItem key={index.toString()} value={data.id}>
                             {data.name}
@@ -1034,12 +881,8 @@ class Lead extends React.PureComponent {
                     <Select
                       labelId="demo-simple-select-outlined-label"
                       id="demo-simple-select-outlined"
-                      value={leadStatusId}
-                      onChange={(event) => {
-                        this.setState({
-                          leadStatusId: event.target.value,
-                        });
-                      }}
+                      value={leaddata.leadsStatusId}
+                      onChange={this.handleChange('leadsStatusId')}
                       label="Lead Status"
                     >
                       <MenuItem value="">
@@ -1049,6 +892,56 @@ class Lead extends React.PureComponent {
                         return (
                           <MenuItem key={index.toString()} value={data.id}>
                             {data.name}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={3}>
+                  <FormControl variant="outlined" className="custom-textfield">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                      Branch
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={leaddata.branchId}
+                      onChange={this.handleChange('branchId')}
+                      label="Branch"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {allBranch.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.name}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={3}>
+                  <FormControl variant="outlined" className="custom-textfield">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                      User
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={leaddata.UserId}
+                      onChange={this.handleChange('UserId')}
+                      label="Branch"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {branchuser.map((data, index) => {
+                        return (
+                          <MenuItem key={index.toString()} value={data.id}>
+                            {data.email}
                           </MenuItem>
                         );
                       })}
@@ -1068,21 +961,26 @@ class Lead extends React.PureComponent {
                 <Typography variant="subtitle1" gutterBottom color="inherit">
                   Spouse
                 </Typography>
+                <Box
+                  ml="auto"
+                  onClick={this.addSpouse}
+                  className="cursor-pointer"
+                >
+                    {Object.keys(spouse).length != 0?(  <HighlightOffIcon color="primary" style={{ fontSize: 25 }} />):(<AddCircleIcon color="primary" style={{ fontSize: 25 }}/>)}
+                
+                </Box>
               </Box>
-
+              {Object.keys(spouse).length != 0 && 
+            <>
               <Grid container spacing={3}>
                 <Grid item xs={3}>
                   <TextField
                     type="text"
                     label="First Name"
                     variant="outlined"
-                    value={spouseFirstName}
+                    value={spouse.firstName}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseFirstName: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('firstName')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1090,13 +988,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Last Name"
                     variant="outlined"
-                    value={spouseLastName}
+                    value={spouse.lastName}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseLastName: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('lastName')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1109,12 +1003,8 @@ class Lead extends React.PureComponent {
                       margin="normal"
                       id="date-picker-inline"
                       label="Date Of Birth"
-                      value={spouseDob ? spouseDob : selectedDate}
-                      onChange={(date) => {
-                        this.setState({
-                          spouseDob: date,
-                        });
-                      }}
+                      value={spouse.dateOfBirth || selectedDate}
+                      onChange={this.handleChangeSpouseDate('dateOfBirth')}
                       className="custom-datepicker"
                       KeyboardButtonProps={{
                         "aria-label": "change date",
@@ -1127,13 +1017,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Email Address"
                     variant="outlined"
-                    value={spouseEmail}
+                    value={spouse.emailAddress}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseEmail: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('emailAddress')}
                   />
                 </Grid>
               </Grid>
@@ -1143,13 +1029,9 @@ class Lead extends React.PureComponent {
                     type="number"
                     label="Mobile Number"
                     variant="outlined"
-                    value={spouseMobileNumber}
+                    value={spouse.mobileNumber}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseMobileNumber: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('mobileNumber')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1157,13 +1039,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Address"
                     variant="outlined"
-                    value={spouseAddress}
+                    value={spouse.address}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseAddress: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('address')}
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1171,13 +1049,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Remarks"
                     variant="outlined"
-                    value={spouseRemarks}
+                    value={spouse.remarks}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseRemarks: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('remarks')}
                   />
                 </Grid>
                 <Grid item xs={3} className="work-experience">
@@ -1195,20 +1069,16 @@ class Lead extends React.PureComponent {
                     <RadioGroup
                       aria-label="gender"
                       name="gender1"
-                      value={spouseWorkexperience}
-                      onChange={(event) => {
-                        this.setState({
-                          spouseWorkexperience: event.target.value,
-                        });
-                      }}
+                      value={spouse.workexperience}
+                      onChange={this.handleChangeSpouse('workexperience')}
                     >
                       <FormControlLabel
-                        value="yes"
+                         value={"true"}
                         control={<Radio color="primary" />}
                         label="Yes"
                       />
                       <FormControlLabel
-                        value="no"
+                         value={"false"}
                         control={<Radio color="primary" />}
                         label="No"
                       />
@@ -1223,13 +1093,10 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Work Duration"
                     variant="outlined"
-                    value={spouseWorkduration}
+                    value={spouse.workduration}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spouseWorkduration: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('workduration')}
+
                   />
                 </Grid>
                 <Grid item xs={3}>
@@ -1237,13 +1104,9 @@ class Lead extends React.PureComponent {
                     type="text"
                     label="Passport Number"
                     variant="outlined"
-                    value={spousePassportnumber}
+                    value={spouse.passportnumber}
                     className="custom-textfield"
-                    onChange={(event) => {
-                      this.setState({
-                        spousePassportnumber: event.target.value,
-                      });
-                    }}
+                    onChange={this.handleChangeSpouse('passportnumber')}
                   />
                 </Grid>
               </Grid>
@@ -1267,10 +1130,10 @@ class Lead extends React.PureComponent {
                   <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
                 </Box>
               </Box>
-              {spouseQualifications.map((data, index) => {
+              {spouse.spouseQualifications?.map((data, index) => {
                 return (
                   <>
-                    {spouseQualifications.length > 1 && index !== 0 ? (
+                    
                       <Box
                         color="text.secondary"
                         mt={3}
@@ -1279,22 +1142,12 @@ class Lead extends React.PureComponent {
                         display="flex"
                         alignItems="center"
                       >
-                        <Box
-                          ml="auto"
-                          onClick={() => this.removeSpouseQualifications(index)}
-                          className="cursor-pointer"
-                        >
-                          <AddCircleIcon
-                            color="primary"
-                            style={{ fontSize: 25 }}
-                          />
-                        </Box>
+                      
                       </Box>
-                    ) : (
-                      ""
-                    )}
+                   
 
                     <Grid key={index.toString()} container spacing={3}>
+                 
                       <Grid item xs={3}>
                         <FormControl
                           variant="outlined"
@@ -1306,23 +1159,8 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={
-                              spouseQualifications[index]["qualificationId"]
-                            }
-                            onChange={(event) => {
-                              console.log(event.target.value);
-                              if (event.target.value) {
-                                let spouseQualifications = [];
-                                spouseQualifications = [
-                                  ...this.state.spouseQualifications,
-                                ];
-                                spouseQualifications[index]["qualificationId"] =
-                                  event.target.value;
-                                this.setState({
-                                  spouseQualifications,
-                                });
-                              }
-                            }}
+                            value={data.qualificationId}
+                            onChange={this.handleChangeSpouseQualifications('qualificationId',index)}
                             label="Qualification"
                           >
                             <MenuItem value="">
@@ -1346,22 +1184,13 @@ class Lead extends React.PureComponent {
                           <KeyboardDatePicker
                             disableToolbar
                             variant="inline"
-                            format="dd-MM-yyyy"
+                            format="yyyy"
                             margin="normal"
                             id="date-picker-inline"
                             label="Passing Year"
                             autoOk
-                            value={spouseQualifications[index]["date"]}
-                            onChange={(date) => {
-                              let spouseQualifications = [];
-                              spouseQualifications = [
-                                ...this.state.spouseQualifications,
-                              ];
-                              spouseQualifications[index]["date"] = date;
-                              this.setState({
-                                spouseQualifications,
-                              });
-                            }}
+                            value={data.passingYear}
+                            onChange={this.handleChangeSpouseQualifications('passingYear',index)}
                             className="custom-datepicker"
                             KeyboardButtonProps={{
                               "aria-label": "change date",
@@ -1370,24 +1199,14 @@ class Lead extends React.PureComponent {
                         </MuiPickersUtilsProvider>
                       </Grid>
 
-                      <Grid item xs={3}>
+                      <Grid item xs={2}>
                         <TextField
                           type="text"
                           label="Percentage"
                           variant="outlined"
                           className="custom-textfield"
-                          value={spouseQualifications[index]["percentage"]}
-                          onChange={(event) => {
-                            let spouseQualifications = [];
-                            spouseQualifications = [
-                              ...this.state.spouseQualifications,
-                            ];
-                            spouseQualifications[index]["percentage"] =
-                              event.target.value;
-                            this.setState({
-                              spouseQualifications,
-                            });
-                          }}
+                          value={data.percentage}
+                          onChange={this.handleChangeSpouseQualifications('percentage',index)}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1395,52 +1214,31 @@ class Lead extends React.PureComponent {
                           type="text"
                           label="Description"
                           variant="outlined"
-                          value={spouseQualifications[index]["description"]}
+                          value={data.description}
+                          onChange={this.handleChangeSpouseQualifications('description',index)}
                           className="custom-textfield"
-                          onChange={(event) => {
-                            let spouseQualifications = [];
-                            spouseQualifications = [
-                              ...this.state.spouseQualifications,
-                            ];
-                            spouseQualifications[index]["description"] =
-                              event.target.value;
-                            this.setState({
-                              spouseQualifications,
-                            });
-                          }}
+                       
                         />
                       </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                      <Grid item xs={3}>
-                        <FormControl
-                          variant="outlined"
-                          className="custom-textfield"
+                      <Grid item xs={1}>
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeSpouseQualifications(index)}
+                          className="cursor-pointer"
                         >
-                          <InputLabel id="demo-simple-select-outlined-label">
-                            University
-                          </InputLabel>
-                          <Select
-                            labelId="demo-simple-select-outlined-label"
-                            id="demo-simple-select-outlined"
-                            value={age}
-                            onChange={this.handleSelectChange}
-                            label="University"
-                          >
-                            <MenuItem value="">
-                              <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
+                          <HighlightOffIcon
+                            color="danger"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                         </Grid>
                     </Grid>
+              
                   </>
                 );
               })}
-
+               </>}
+       
               <Box
                 color="text.secondary"
                 mt={3}
@@ -1460,33 +1258,11 @@ class Lead extends React.PureComponent {
                   <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
                 </Box>
               </Box>
-
-              {qualificationInputs.map((data, index) => {
+             
+              {leaddata.userQualifications.map((data, index) => {
                 return (
                   <>
-                    {qualificationInputs.length > 1 && index !== 0 ? (
-                      <Box
-                        color="text.secondary"
-                        mt={3}
-                        mb={2}
-                        className="spouse-heading"
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box
-                          ml="auto"
-                          onClick={() => this.removeQualifications(index)}
-                          className="cursor-pointer"
-                        >
-                          <AddCircleIcon
-                            color="primary"
-                            style={{ fontSize: 25 }}
-                          />
-                        </Box>
-                      </Box>
-                    ) : (
-                      ""
-                    )}
+        
                     <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
@@ -1499,22 +1275,9 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={
-                              qualificationInputs[index]["qualificationId"]
-                            }
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                let qualificationInputs = [];
-                                qualificationInputs = [
-                                  ...this.state.qualificationInputs,
-                                ];
-                                qualificationInputs[index]["qualificationId"] =
-                                  event.target.value;
-                                this.setState({
-                                  qualificationInputs,
-                                });
-                              }
-                            }}
+                           
+                            value={data.qualificationId}
+                            onChange={this.handleChangeQualifications('qualificationId',index)}
                             label="Qualification"
                           >
                             <MenuItem value="">
@@ -1543,17 +1306,8 @@ class Lead extends React.PureComponent {
                             id="date-picker-inline"
                             label="Passing Year"
                             autoOk
-                            value={qualificationInputs[index]["date"]}
-                            onChange={(date) => {
-                              let qualificationInputs = [];
-                              qualificationInputs = [
-                                ...this.state.qualificationInputs,
-                              ];
-                              qualificationInputs[index]["date"] = date;
-                              this.setState({
-                                qualificationInputs,
-                              });
-                            }}
+                            value={data.passingYear}
+                            onChange={this.handleChangeQualifications('passingYear',index)}
                             className="custom-datepicker"
                             KeyboardButtonProps={{
                               "aria-label": "change date",
@@ -1568,66 +1322,32 @@ class Lead extends React.PureComponent {
                           label="Percentage"
                           variant="outlined"
                           className="custom-textfield"
-                          value={qualificationInputs[index]["percentage"]}
-                          onChange={(event) => {
-                            let qualificationInputs = [];
-                            qualificationInputs = [
-                              ...this.state.qualificationInputs,
-                            ];
-                            qualificationInputs[index]["percentage"] =
-                              event.target.value;
-                            this.setState({
-                              qualificationInputs,
-                            });
-                          }}
+                          value={data.percentage}
+                          onChange={this.handleChangeQualifications('percentage',index)}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={2}>
                         <TextField
                           type="text"
                           label="Description"
                           variant="outlined"
                           className="custom-textfield"
-                          value={qualificationInputs[index]["description"]}
-                          onChange={(event) => {
-                            let qualificationInputs = [];
-                            qualificationInputs = [
-                              ...this.state.qualificationInputs,
-                            ];
-                            qualificationInputs[index]["description"] =
-                              event.target.value;
-                            this.setState({
-                              qualificationInputs,
-                            });
-                          }}
+                          value={data.description}
+                          onChange={this.handleChangeQualifications('description',index)}
                         />
                       </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                      <Grid item xs={3}>
-                        <FormControl
-                          variant="outlined"
-                          className="custom-textfield"
+                      <Grid item xs={1}>
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeQualifications(index)}
+                          className="cursor-pointer"
                         >
-                          <InputLabel id="demo-simple-select-outlined-label">
-                            University
-                          </InputLabel>
-                          <Select
-                            labelId="demo-simple-select-outlined-label"
-                            id="demo-simple-select-outlined"
-                            value={age}
-                            onChange={this.handleSelectChange}
-                            label="University"
-                          >
-                            <MenuItem value="">
-                              <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
+                          <HighlightOffIcon
+                            color="danger"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                         </Grid>
                     </Grid>
                   </>
                 );
@@ -1651,32 +1371,10 @@ class Lead extends React.PureComponent {
                   <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
                 </Box>
               </Box>
-              {visaInfos.map((data, index) => {
+              {leaddata.createUserVisa.map((data, index) => {
                 return (
                   <>
-                    {visaInfos.length > 1 && index !== 0 ? (
-                      <Box
-                        color="text.secondary"
-                        mt={3}
-                        mb={2}
-                        className="spouse-heading"
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box
-                          ml="auto"
-                          onClick={() => this.removeVisaInfos(index)}
-                          className="cursor-pointer"
-                        >
-                          <AddCircleIcon
-                            color="primary"
-                            style={{ fontSize: 25 }}
-                          />
-                        </Box>
-                      </Box>
-                    ) : (
-                      ""
-                    )}
+             
                     <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
@@ -1689,17 +1387,8 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={visaInfos[index]["visaId"]}
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                let visaInfos = [];
-                                visaInfos = [...this.state.visaInfos];
-                                visaInfos[index]["visaId"] = event.target.value;
-                                this.setState({
-                                  visaInfos,
-                                });
-                              }
-                            }}
+                            value={data.visaTypeId}
+                            onChange={this.handleChangeVisa('visaTypeId',index)}
                             label="Visa Type"
                           >
                             <MenuItem value="">
@@ -1729,18 +1418,8 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={visaInfos[index]["visaCountry"]}
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                let visaInfos = [];
-                                visaInfos = [...this.state.visaInfos];
-                                visaInfos[index]["visaCountry"] =
-                                  event.target.value;
-                                this.setState({
-                                  visaInfos,
-                                });
-                              }
-                            }}
+                            value={data.countryId}
+                            onChange={this.handleChangeVisa('countryId',index)}
                             label="Country"
                           >
                             <MenuItem value="">
@@ -1766,15 +1445,8 @@ class Lead extends React.PureComponent {
                           label="City"
                           variant="outlined"
                           className="custom-textfield"
-                          value={visaInfos[index]["visaCity"]}
-                          onChange={(event) => {
-                            let visaInfos = [];
-                            visaInfos = [...this.state.visaInfos];
-                            visaInfos[index]["visaCity"] = event.target.value;
-                            this.setState({
-                              visaInfos,
-                            });
-                          }}
+                          value={data.city}
+                          onChange={this.handleChangeVisa('city',index)}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1783,15 +1455,8 @@ class Lead extends React.PureComponent {
                           label="Reason"
                           variant="outlined"
                           className="custom-textfield"
-                          value={visaInfos[index]["visaReason"]}
-                          onChange={(event) => {
-                            let visaInfos = [];
-                            visaInfos = [...this.state.visaInfos];
-                            visaInfos[index]["visaReason"] = event.target.value;
-                            this.setState({
-                              visaInfos,
-                            });
-                          }}
+                          value={data.reason}
+                          onChange={this.handleChangeVisa('reason',index)}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -1800,19 +1465,55 @@ class Lead extends React.PureComponent {
                           label="remarks"
                           variant="outlined"
                           className="custom-textfield"
-                          value={visaInfos[index]["visaRemarks"]}
-                          onChange={(event) => {
-                            let visaInfos = [];
-                            visaInfos = [...this.state.visaInfos];
-                            visaInfos[index]["visaRemarks"] =
-                              event.target.value;
-                            this.setState({
-                              visaInfos,
-                            });
-                          }}
+                          value={data.remarks}
+                          onChange={this.handleChangeVisa('remarks',index)}
                         />
                       </Grid>
+                      <Grid item xs={3}>
+                        <FormControl
+                          variant="outlined"
+                          className="custom-textfield"
+                        >
+                          <InputLabel id="demo-simple-select-outlined-label">
+                            University
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={data.universityId}
+                            onChange={this.handleChangeVisa('universityId',index)}
+                            label="University"
+                          >
+                            <MenuItem value="">
+                              <em>None</em>
+                            </MenuItem>
+                            {allUniversities.map((data, index) => {
+                              return (
+                                <MenuItem
+                                  key={index.toString()}
+                                  value={data.id}
+                                >
+                                  {data.name}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeVisaInfos(index)}
+                          className="cursor-pointer"
+                        >
+                          <HighlightOffIcon
+                            color="danger"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                         </Grid>
                     </Grid>
+                 
                   </>
                 );
               })}
@@ -1836,32 +1537,9 @@ class Lead extends React.PureComponent {
                   <AddCircleIcon color="primary" style={{ fontSize: 25 }} />
                 </Box>
               </Box>
-              {visaRefusaleses.map((data, index) => {
+              {leaddata.userVisaRefusales.map((data, index) => {
                 return (
                   <>
-                    {visaRefusaleses.length > 1 && index !== 0 ? (
-                      <Box
-                        color="text.secondary"
-                        mt={3}
-                        mb={2}
-                        className="spouse-heading"
-                        display="flex"
-                        alignItems="center"
-                      >
-                        <Box
-                          ml="auto"
-                          onClick={() => this.removeRefUsaleses(index)}
-                          className="cursor-pointer"
-                        >
-                          <AddCircleIcon
-                            color="primary"
-                            style={{ fontSize: 25 }}
-                          />
-                        </Box>
-                      </Box>
-                    ) : (
-                      ""
-                    )}
                     <Grid key={index.toString()} container spacing={3}>
                       <Grid item xs={3}>
                         <FormControl
@@ -1874,16 +1552,8 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={visaRefusaleses[index]["refVisaID"]}
-                            onChange={(event) => {
-                              let visaRefusaleses = [];
-                              visaRefusaleses = [...this.state.visaRefusaleses];
-                              visaRefusaleses[index]["refVisaID"] =
-                                event.target.value;
-                              this.setState({
-                                visaRefusaleses,
-                              });
-                            }}
+                            value={data.visaTypeId}
+                            onChange={this.handleChangeVisaRefusales('visaTypeId',index)}
                             label="Visa Type"
                           >
                             <MenuItem value="">
@@ -1913,20 +1583,8 @@ class Lead extends React.PureComponent {
                           <Select
                             labelId="demo-simple-select-outlined-label"
                             id="demo-simple-select-outlined"
-                            value={visaRefusaleses[index]["refCountry"]}
-                            onChange={(event) => {
-                              if (event.target.value) {
-                                let visaRefusaleses = [];
-                                visaRefusaleses = [
-                                  ...this.state.visaRefusaleses,
-                                ];
-                                visaRefusaleses[index]["refCountry"] =
-                                  event.target.value;
-                                this.setState({
-                                  visaRefusaleses,
-                                });
-                              }
-                            }}
+                            value={data.countryId}
+                            onChange={this.handleChangeVisaRefusales('countryId',index)}
                             label="Country"
                           >
                             <MenuItem value="">
@@ -1951,37 +1609,33 @@ class Lead extends React.PureComponent {
                           type="text"
                           label="Reason"
                           variant="outlined"
-                          value={visaRefusaleses[index]["refReason"]}
                           className="custom-textfield"
-                          onChange={(event) => {
-                            let visaRefusaleses = [];
-                            visaRefusaleses = [...this.state.visaRefusaleses];
-                            visaRefusaleses[index]["refReason"] =
-                              event.target.value;
-                            this.setState({
-                              visaRefusaleses,
-                            });
-                          }}
+                          value={data.reason}
+                            onChange={this.handleChangeVisaRefusales('reason',index)}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={2}>
                         <TextField
                           type="text"
                           label="remarks"
                           variant="outlined"
                           className="custom-textfield"
-                          value={visaRefusaleses[index]["refRemarks"]}
-                          onChange={(event) => {
-                            let visaRefusaleses = [];
-                            visaRefusaleses = [...this.state.visaRefusaleses];
-                            visaRefusaleses[index]["refRemarks"] =
-                              event.target.value;
-                            this.setState({
-                              visaRefusaleses,
-                            });
-                          }}
+                          value={data.remarks}
+                          onChange={this.handleChangeVisaRefusales('remarks',index)}
                         />
                       </Grid>
+                      <Grid item xs={1}>
+                        <Box
+                          ml="auto"
+                          onClick={() => this.removeRefUsaleses(index)}
+                          className="cursor-pointer"
+                        >
+                          <HighlightOffIcon
+                            color="danger"
+                            style={{ fontSize: 25 }}
+                          />
+                        </Box>
+                         </Grid>
                     </Grid>
                   </>
                 );
@@ -1991,36 +1645,72 @@ class Lead extends React.PureComponent {
                 <Button
                   variant="contained"
                   color="primary"
+                  disabled={isloader}
                   disableElevation
                   size="large"
                   onClick={this.onSubmit}
                   className="custom-button"
                 >
+                      {isloader && <CircularProgress size={16} />}
                   Submit
                 </Button>
               </Box>
             </Box>
-          
-          <Snackbar
-            autoHideDuration={6000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            open={errorSnack}
-            onClose={this.handleClose}
-          >
-            {errorMessage ? (
-              <Alert onClose={this.handleClose} severity="error">
-                {errorMessage}
-              </Alert>
-            ) : (
-              <Alert onClose={this.handleClose} severity="success">
-                {"Data Successfully Submitted"}
-              </Alert>
-            )}
-          </Snackbar>
+         
         </Box>
-     
+        }
+
+       <Snackbar
+          autoHideDuration={3000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={errorSnack}
+          onClose={this.handleClose}
+        >
+          {errorMessage ? (
+            <Alert onClose={this.handleClose} severity="error">
+              {errorMessage}
+            </Alert>
+          ) : (
+            ""
+          )}
+        </Snackbar>
+        <Snackbar
+          autoHideDuration={3000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          open={isSnack}
+          onClose={this.handleClose}
+        >
+          {Message ? (
+            <Alert onClose={this.handleClose} severity="success">
+              {Message}
+            </Alert>
+          ) : (
+            ""
+          )}
+        </Snackbar>
+        </React.Fragment>
+    
     );
   }
 }
+
+
+const useStyles = makeStyles((theme) => ({
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#299277',
+    },
+  }));
+  
+function LoaderBackdrop(props) {
+    const classes = useStyles();
+    return (
+      <div>
+        <Backdrop className={classes.backdrop} open={props.isload}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </div>
+    );
+  }
 
 export default Lead;

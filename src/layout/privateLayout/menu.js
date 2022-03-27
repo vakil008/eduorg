@@ -22,15 +22,44 @@ export const menu = [
     to: "/branch",
     title: "Branch"
   },
-  {
-    icon: <DescriptionOutlinedIcon />,
-    to: "/addlead",
-    title: "Add lead"
-  },
+  // {
+  //   icon: <DescriptionOutlinedIcon />,
+  //   to: "/addlead",
+  //   title: "Add lead"
+  // },
   {
     icon: <DescriptionOutlinedIcon />,
     to: "/leads",
-    title: "Add lead"
+    title: "leads"
+  },
+  
+  // {
+  //   icon: <DescriptionOutlinedIcon />,
+  //   to: "/leadsStatus",
+  //   title: "Leads Status"
+  // },
+
+  // {
+  //   icon: <DescriptionOutlinedIcon />,
+  //   to: "/qualification",
+  //   title: "Qualification"
+  // }
+];
+
+
+
+export const menu1 = [
+  {
+    icon: <HomeOutlinedIcon />,
+    title: "Home",
+    to: "/dashboard"
+  },
+  
+
+  {
+    icon: <DescriptionOutlinedIcon />,
+    to: "/leads",
+    title: "leads"
   },
   
   // {

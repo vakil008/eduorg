@@ -25,15 +25,26 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import logo from '../../theme/assets/images/inner-logo.png';
 import smallLogo from '../../theme/assets/images/small-logo.png';
 import { useNavigate, Link } from "react-router-dom";
-import { menu } from "./menu";
-
+import { menu,menu1 } from "./menu";
+import { useSelector } from 'react-redux'
 const AppHeader = (props) => {
   // const opneNavMenu = () => {
   //   document.body.classList.add('openMenu');
   // }
   // const closeNavMenu = () => {
   //   document.body.classList.remove('openMenu');
+
   // }
+  let menulist=[];
+  const role= useSelector((state) => state.user.roles);
+  const values = ['SuperAdmin', 'Admin'];
+  const isShowMenu= role.includes(values);
+  if(!isShowMenu){
+    menulist=menu1
+  }else{
+    menulist=menu
+  }
+  console.log("sdffsdfsdfsfdsdf",role)
   const navigate = useNavigate();
   const [clicked, setClicked] = useState('');
 
@@ -57,8 +68,10 @@ const AppHeader = (props) => {
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    localStorage.removeItem("persist:persist-root");
+    window.location.assign('/');
   };
+  
 
   return <>
     <ThemeProvider theme={theme}>
@@ -121,7 +134,7 @@ const AppHeader = (props) => {
           </Box>
 
         </Box>
-        {menu.map((item, key) => <MenuItm key={key} item={item} />)}
+        {menulist.map((item, key) => <MenuItm key={key} item={item} />)}
 
       </Paper>
       <div className="appHeader">

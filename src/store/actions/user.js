@@ -18,3 +18,8 @@ export const setUserToken = (param) => ({
   type: ActionTypes.SET_USER_TOKEN,
   payload: param,
 });
+
+export const setUserRole = (param) => ({
+  type: ActionTypes.SET_USER_ROLE,
+  payload: param,
+});
