@@ -1,5 +1,5 @@
 export const appConfig = {
-  mainDomain: "https://localhost:5001",
+  mainDomain: "https://crmleadedu.herokuapp.com",
 };
 export const middlePoints = "api";
 
