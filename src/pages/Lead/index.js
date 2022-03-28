@@ -465,7 +465,7 @@ onSubmit =async (event) => {
 
   ismaritalstatus= ismaritalstatus=="true"?true:false;
   workexperience= workexperience=="true"?true:false;
-  if(Object.keys(spouse).length != 0){
+  if(spouse && Object.keys(spouse).length != 0){
     spouse.workexperience= spouse.workexperience=="true"?true:false;
     leaddata={...leaddata,spouse};
   }
