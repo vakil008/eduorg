@@ -52,7 +52,7 @@ class Lead extends React.PureComponent {
         workduration: null,
         passportnumber: null,
         branchId: 0,
-        UserId: 0,
+        UserId: null,
         ismaritalstatus: true,
         listeningScore: null,
         readingScore: null,
