@@ -124,16 +124,30 @@ class Lead extends React.PureComponent {
   };
 
   addQuificationsUser = (data) => { 
-    let {leaddata} = this.state;
-    delete data['branch'];
-    let {userQualifications,userVisa,spouseQualifications,userVisaRefusales,spouse}=data;
-    delete data['spouseQualifications'];
-    spouse.spouseQualifications=spouseQualifications;
-     leaddata={ ...leaddata, spouse};
-   let leads ={...leaddata,...data}
-   console.log("response of GetLeadbyid", leads);
-    this.setState({leaddata:leads,isload:false});
-    
+
+      
+      let {leaddata} = this.state;
+      delete data['branch'];
+      let {spouseQualifications,userVisaRefusales,spouse}=data;
+
+      if(spouse){
+        if(spouseQualifications){
+          delete data['spouseQualifications'];
+          spouse.spouseQualifications=spouseQualifications;
+        }
+        console.log("if  of GetLeadbyid", spouse);
+        
+        leaddata={ ...leaddata, spouse};
+      }else{
+        console.log("else of GetLeadbyid", spouse);
+        spouse={};
+        leaddata={ ...leaddata, spouse};
+      }
+  
+     let leads ={...leaddata,...data}
+     console.log("response of GetLeadbyid", leads);
+      this.setState({leaddata:leads,isload:false});
+
   };
   
 
@@ -966,11 +980,11 @@ handleChangeQualifications = (prop,index) => (event) => {
                   onClick={this.addSpouse}
                   className="cursor-pointer"
                 >
-                    {Object.keys(spouse).length != 0?(  <HighlightOffIcon color="primary" style={{ fontSize: 25 }} />):(<AddCircleIcon color="primary" style={{ fontSize: 25 }}/>)}
+                    { spouse && Object.keys(spouse).length != 0?(  <HighlightOffIcon color="primary" style={{ fontSize: 25 }} />):(<AddCircleIcon color="primary" style={{ fontSize: 25 }}/>)}
                 
                 </Box>
               </Box>
-              {Object.keys(spouse).length != 0 && 
+              {(spouse && Object.keys(spouse).length != 0) && 
             <>
               <Grid container spacing={3}>
                 <Grid item xs={3}>
