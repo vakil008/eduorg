@@ -38,12 +38,8 @@ const AppHeader = (props) => {
   let menulist=[];
   const role= useSelector((state) => state.user.roles);
   const values = ['SuperAdmin', 'Admin'];
-  const isShowMenu= role.includes(values);
-  if(!isShowMenu){
-    menulist=menu1
-  }else{
-    menulist=menu
-  }
+  let result = values.every(i => role.includes(i));
+
   console.log("sdffsdfsdfsfdsdf",role)
   const navigate = useNavigate();
   const [clicked, setClicked] = useState('');
@@ -134,7 +130,8 @@ const AppHeader = (props) => {
           </Box>
 
         </Box>
-        {menulist.map((item, key) => <MenuItm key={key} item={item} />)}
+        {result?menu.map((item, key) => <MenuItm key={key} item={item} />): menu1.map((item, key) => <MenuItm key={key} item={item} />)}
+       
 
       </Paper>
       <div className="appHeader">
