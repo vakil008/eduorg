@@ -264,6 +264,28 @@ const GetAllUser = async () => {
   }
 };
 
+const GetLeadbyid = async (id) => {
+  try {
+    const { get_leadbyid } = endPoints;
+
+    const res = await Api(`${get_leadbyid}?id=${id}`, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const GetUserbyBranchid = async (id) => {
+  try {
+    const { get_user_by_branch } = endPoints;
+
+    const res = await Api(`${get_user_by_branch}?id=${id}`, true);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 const UserService = {
   singin,
   GetAllQualification,

@@ -31,6 +31,8 @@ import UserService from "../../services/user.service";
 import { withStyles } from '@material-ui/core/styles';
 
 
+import Lead from '../Lead';
+
 
 
 const useStyles = theme=> ({
@@ -71,7 +73,8 @@ class Leadss extends React.PureComponent {
       left: false,
       bottom: false,
       right: false,
-      allLead:[]
+      allLead:[],
+      leadId:null,
     };
   }
 
@@ -172,18 +175,20 @@ class Leadss extends React.PureComponent {
 
   
 
-    toggleDrawer = (anchor, open) => (event) => {
+    toggleDrawer = (anchor, open,id) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
-    this.setState({ [anchor]: open });
+    this.setState({ [anchor]: open ,
+      leadId:id
+    });
   
   };
 
   render() {
     const { classes } = this.props;
 
-    const { rowsPerPage,page,selected,orderBy,order,allLead } = this.state;
+    const { rowsPerPage,page,selected,orderBy,order,allLead,leadId } = this.state;
      const rows= allLead;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, allLead.length - page * rowsPerPage);
 
@@ -201,67 +206,7 @@ class Leadss extends React.PureComponent {
         role="presentation"
       
       >
-        <Box className="common-content" position="relative" height="100%">
-            <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
-              <Box color="text.textBlue">
-                <Typography variant="h6" gutterBottom color="inherit">
-                  Edit
-                </Typography>
-              </Box>
-              <Box
-                className="close-drawer cursor-pointer"
-                display="flex"
-                alignItems="center"
-                color="grey.500"
-                onClick={this.toggleDrawer(anchor, false)}>
-                <CloseIcon color="inherit" />
-              </Box>
-            </Box>
-            <Divider />
-  
-            <Box className="share-sidebar-content share-mamber-content" p={3}>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
-                <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
-              </Grid>
-            </Grid>
-  
-              <Box>
-              
-              </Box>
-            </Box>
-  
-            <Box
-            className="sidebar-footer"
-            position="absolute"
-            bottom="0"
-            left="0"
-            width="100%"
-            minHeight="82px"
-            px={3}
-            py={1.5}
-            display="flex"
-            alignItems="center"
-            boxSizing="border-box"
-            bgcolor="primary.drawerBg">
-            <Box  pr={1} width="150px" boxSizing="border-box">
-              <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={this.toggleDrawer(anchor, false)}>
-                Cancel
-              </Button>
-            </Box>
-            <Box width="150px" boxSizing="border-box">
-              <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-                Update
-              </Button>
-            </Box>
-          </Box>
-          </Box>
+       <Lead  leadId={leadId}/>
       </Box>
       </Box>
   
@@ -276,6 +221,19 @@ class Leadss extends React.PureComponent {
               <Typography variant="h6" gutterBottom color="inherit">
                 Leads
               </Typography>
+                {/* Drawer Map here */}
+   <div>
+        {['right'].map((anchor) => (
+          <React.Fragment key={anchor}>
+            <Button onClick={this.toggleDrawer(anchor, true,null)}>Add New Lead</Button>
+            <Drawer className="common-sidebar-big " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false,null)}>
+              {list(anchor)}
+            </Drawer>
+          </React.Fragment>
+        ))}
+      </div> 
+  
+      {/* Drawer Map here */}
             </Box>
             <Divider />
           </Box>
@@ -330,7 +288,7 @@ class Leadss extends React.PureComponent {
                         <TableCell align="center">{Lead.dob}</TableCell>
                         <TableCell align="center">{Lead.emailAddress}</TableCell>
                         <TableCell align="center">{Lead.mobileNumber}</TableCell>
-                        <TableCell align="center">{Lead.leadSource.name}</TableCell>
+                   
                         <TableCell align="center">{Lead.branch.name}</TableCell>
                         
                         <TableCell align="center">{Lead.listeningScore}</TableCell>
@@ -343,11 +301,15 @@ class Leadss extends React.PureComponent {
                         <TableCell align="center">{Lead.leadsStatus.name}</TableCell>
                         <TableCell align="right">
   <Box display="inline-flex" alignItems="center" ml="auto">
-    <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
+    {/* <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
       <EditIcon style={{ fontSize: 18 }} color="inherit" />
-      </Box>
+      </Box> */}
       <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-      <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
+      <Button onClick={this.toggleDrawer('right', true,Lead.id)}>  <EditIcon style={{ fontSize: 18 }} color="inherit" /></Button>
+    
+            <Drawer className="common-sidebar-big" anchor={'right'} open={this.state['right']} onClose={this.toggleDrawer('right', false,null)}>
+              {list('right')}
+            </Drawer>
       </Box>
   </Box>
                         </TableCell>
@@ -376,19 +338,7 @@ class Leadss extends React.PureComponent {
       </div>
   </div>
   
-  {/* Drawer Map here */}
-  {/* <div>
-        {['right'].map((anchor) => (
-          <React.Fragment key={anchor}>
-            <Button onClick={this.toggleDrawer(anchor, true)}>{anchor}</Button>
-            <Drawer className="common-sidebar " anchor={anchor} open={this.state[anchor]} onClose={this.toggleDrawer(anchor, false)}>
-              {list(anchor)}
-            </Drawer>
-          </React.Fragment>
-        ))}
-      </div> */}
-  
-      {/* Drawer Map here */}
+
         </Paper>
       </Box>
     </ThemeProvider>
@@ -435,7 +385,6 @@ const headCells = [
   { id: 'dob', numeric: false, disablePadding: false, label: 'Date Of Birth' },
   { id: 'emailAddress', numeric: false, disablePadding: false, label: 'Email' },
   { id: 'mobileNumber', numeric: false, disablePadding: false, label: 'Mobile Number' },
-  { id: 'leadSource', numeric: false, disablePadding: false, label: 'Source' },
   { id: 'branch', numeric: false, disablePadding: false, label: 'Branch' },
  
   { id: 'listeningScore', numeric: false, disablePadding: false, label: 'Listening Score' },

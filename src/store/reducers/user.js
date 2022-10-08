@@ -17,7 +17,6 @@ const User = (state = initialState, action) => {
       return Object.assign({}, state, {
         userLogin,
         userID,
-
         userData,
       });
 

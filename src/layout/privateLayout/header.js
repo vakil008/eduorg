@@ -28,7 +28,14 @@ const AppHeader = (props) => {
   // }
   // const closeNavMenu = () => {
   //   document.body.classList.remove('openMenu');
+
   // }
+  let menulist = [];
+  const role = useSelector((state) => state.user.roles);
+  const values = ["SuperAdmin", "Admin"];
+  let result = values.every((i) => role.includes(i));
+
+  console.log("sdffsdfsdfsfdsdf", role);
   const navigate = useNavigate();
   const [clicked, setClicked] = useState("");
 

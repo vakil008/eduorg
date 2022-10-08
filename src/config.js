@@ -30,8 +30,10 @@ export const endPoints = {
   all_qualifications: `${middlePoints}/v1/Settings/GetAllQualification`,
   all_universities: `${middlePoints}/v1/Settings/GetAllUniversity`,
   all_leads_status: `${middlePoints}/v1/Settings/GetAllLeadsStatus`,
-  all_leads: `${middlePoints}/v1/Leads`,
+  all_leads: `${middlePoints}/v1/Leads?pageNumber=1&pageSize=1000`,
+  all_save_leads: `${middlePoints}/v1/Leads`,
   all_user: `${middlePoints}/identity/getalluser`,
-
+  get_leadbyid: `${middlePoints}/v1/Leads/Getbyid`,
   save_branch: `${middlePoints}/v1/Settings/SaveBranch`,
+  get_user_by_branch: `${middlePoints}/identity/getallbybranch`,
 };
