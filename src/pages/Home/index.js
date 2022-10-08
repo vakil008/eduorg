@@ -28,7 +28,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../theme/light";
 import { withStyles } from "@material-ui/core/styles";
 import DateFnsUtils from "@date-io/date-fns";
-import ReactHTMLTableToExcel from "react-html-table-to-excel";
+import ReactHTMLTableToExcel from "../ReactHTMLTableToExcel";
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,

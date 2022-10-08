@@ -31,11 +31,9 @@ const AppHeader = (props) => {
 
   // }
   let menulist = [];
-  const role = useSelector((state) => state.user.roles);
-  const values = ["SuperAdmin", "Admin"];
-  let result = values.every((i) => role.includes(i));
 
-  console.log("sdffsdfsdfsfdsdf", role);
+  const values = ["SuperAdmin", "Admin"];
+
   const navigate = useNavigate();
   const [clicked, setClicked] = useState("");
 
