@@ -19,19 +19,25 @@ import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { ThemeProvider } from "@material-ui/core/styles";
 import { theme } from "../../theme/light";
 import UserService from "../../services/user.service";
-import { setUserToken } from "../../store/actions/user";
+import {
+  setUserFacility,
+  setUserToken,
+  userLogout,
+} from "../../store/actions/user";
 import { connect } from "react-redux";
 class Login extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      email: "",
+      email: "", //34_adminvaibhav1
       password: "",
       weight: "",
       weightRange: "",
       showPassword: false,
     };
   }
+
+  componentDidMount() {}
 
   handleClickShowPassword = () => {
     const { showPassword } = this.state;
@@ -49,17 +55,43 @@ class Login extends React.PureComponent {
     const { dispatch } = this.props;
     const { email, password } = this.state;
     console.log("ssss");
-    // eslint-disable-next-line no-console
-    // if (values.email && values.password) {
 
     try {
       const response = await UserService.singin(email, password);
       const { status, data } = response;
-      const { data: userData, succeeded } = data;
+      const { respCode } = data;
       console.log("response after login call --> ", response);
-      if (succeeded) {
-        const { email, jwToken, userName } = userData;
-        dispatch(setUserToken(jwToken));
+      if (status && respCode == 1) {
+        const {
+          access,
+          defaultstatecode,
+          facilityid,
+          facilityname,
+          forcepasswordchange,
+          gstnumber,
+          message,
+          role,
+          token,
+          username,
+          relogin,
+        } = data;
+
+        // let userData = {
+        //   access,
+        //   defaultstatecode,
+        //   facilityid,
+        //   facilityname,
+        //   forcepasswordchange,
+        //   gstnumber,
+        //   message,
+        //   role,
+        //   token,
+        //   username,
+        //   relogin,
+        //   login: "true",
+        // };
+        dispatch(setUserFacility(facilityid));
+        dispatch(setUserToken(token));
       }
     } catch (error) {
       console.log("status error", error);
@@ -85,7 +117,7 @@ class Login extends React.PureComponent {
                 justifyContent="center"
                 flexDirection="column"
               >
-                <Box
+                {/* <Box
                   className="logo"
                   mb={2}
                   textAlign="center"
@@ -93,7 +125,7 @@ class Login extends React.PureComponent {
                   mx="auto"
                 >
                   <img src={logo} alt="img" className="login-logo" />
-                </Box>
+                </Box> */}
                 <Box color="text.primary" mb={2.7} textAlign="center">
                   <Typography variant="h6" gutterBottom color="inherit">
                     Please fill the fields below
@@ -102,13 +134,13 @@ class Login extends React.PureComponent {
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <TextField
-                      type="email"
+                      type="text"
                       onChange={(event) => {
                         this.setState({
                           email: event.target.value,
                         });
                       }}
-                      label="Email Address"
+                      label="User Id"
                       value={email}
                       variant="outlined"
                       className="custom-textfield"
@@ -163,7 +195,7 @@ class Login extends React.PureComponent {
                     Login
                   </Button>
                 </Box>
-                <Box color="text.primary" textAlign="center">
+                {/* <Box color="text.primary" textAlign="center">
                   <Typography variant="body1" gutterBottom>
                     Create a new account?
                     <Box component="span" ml={1}>
@@ -178,7 +210,7 @@ class Login extends React.PureComponent {
                       </Link>
                     </Box>
                   </Typography>
-                </Box>
+                </Box> */}
               </Box>
             </Box>
           </Box>
@@ -188,4 +220,5 @@ class Login extends React.PureComponent {
   }
 }
 const mapStateToProps = (state) => ({});
+
 export default connect(mapStateToProps)(Login);

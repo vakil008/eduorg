@@ -4,29 +4,28 @@ import { appConfig } from "../config";
 import { store } from "../store";
 const { mainDomain } = appConfig;
 
- const Api = async (endpoint,isauthenticated, method, body, contentType) => {
+const Api = async (endpoint, isauthenticated, method, body, contentType) => {
   try {
-
-
     var newState = store.getState().user.loginToken;
-    let headers={
+    let headers = {
       Accept: "application/json",
       "Content-Type": contentType || "application/json",
+      "Access-Control-Allow-Origin": "http://localhost:3000",
+      "Access-Control-Allow-Credentials": "true",
     };
-    if(isauthenticated){
+    if (isauthenticated) {
       headers = {
         Authorization: `Bearer  ${newState}`,
         Accept: "application/json",
         "Content-Type": contentType || "application/json",
-      }
+      };
     }
-   
 
     const response = await axios({
       url: `${mainDomain}/${endpoint}`,
       method: method || "GET",
       data: body,
-      headers:headers,
+      headers: headers,
       responseType: "json",
     });
 
@@ -34,16 +33,16 @@ const { mainDomain } = appConfig;
   } catch (error) {
     if (error.response !== undefined) {
       const errObj = error.response;
-      const {status } = error.response;
-      if(status==401){
+      const { status } = error.response;
+      if (status == 401) {
         localStorage.removeItem("persist:persist-root");
-        window.location.assign('/');
+        window.location.assign("/");
       }
-      console.log("return success to frontend",error.response)
+      console.log("return success to frontend", error.response);
 
       return errObj; // return success to frontend
     }
-    console.log("return success to sssss",error)
+    console.log("return success to sssss", error);
     return error;
   }
 };

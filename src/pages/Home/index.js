@@ -1,525 +1,1455 @@
-
 import React from "react";
+import "date-fns";
 import {
-  Paper, Box, Typography, Divider
+  Paper,
+  Box,
+  Typography,
+  Divider,
+  Container,
+  InputLabel,
+  Select,
+  FormControl,
+  FormHelperText,
+  MenuItem,
+  Grid,
+  Button,
 } from "@material-ui/core";
+import { Table, TextField, CircularProgress } from "@material-ui/core";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TablePagination from "@material-ui/core/TablePagination";
+import TableRow from "@material-ui/core/TableRow";
+import TableSortLabel from "@material-ui/core/TableSortLabel";
+import Toolbar from "@material-ui/core/Toolbar";
+import { connect } from "react-redux";
 import { ThemeProvider } from "@material-ui/core/styles";
-import { theme } from '../../theme/light';
+import { theme } from "../../theme/light";
+import { withStyles } from "@material-ui/core/styles";
+import DateFnsUtils from "@date-io/date-fns";
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardTimePicker,
+  KeyboardDatePicker,
+} from "@material-ui/pickers";
+import UserService from "../../services/user.service";
+import moment from "moment";
 
-function Home() {
+const useStyles = (theme) => ({
+  root: {
+    "& > *": {
+      marginTop: theme.spacing(4),
+    },
+  },
+  roots: {
+    width: "100%",
+  },
+  paper: {
+    width: "100%",
+  },
+  papers: {
+    width: "100%",
+    marginBottom: theme.spacing(2),
+  },
+
+  formControl: {
+    marginTop: theme.spacing(2),
+    minWidth: 300,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
+});
+
+const headCells = [
+  {
+    id: "facilityName",
+    numeric: false,
+    disablePadding: false,
+    label: "Facility Name",
+  },
+  // {
+  //   id: "vehicleType",
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: "Vehicle Type",
+  // },
+  {
+    id: "checkin",
+    numeric: false,
+    disablePadding: false,
+    label: "Total Check In",
+  },
+  {
+    id: "checkout",
+    numeric: false,
+    disablePadding: false,
+    label: "Total Check Out",
+  },
+  {
+    id: "total",
+    numeric: false,
+    disablePadding: false,
+    label: "Total",
+  },
+];
+
+const paymentHeadCells = [
+  {
+    id: "online",
+    numeric: false,
+    disablePadding: false,
+    label: "Online",
+  },
+  {
+    id: "cash",
+    numeric: false,
+    disablePadding: false,
+    label: "Cash",
+  },
+  {
+    id: "exempt",
+    numeric: false,
+    disablePadding: false,
+    label: "Exempt",
+  },
+  {
+    id: "total",
+    numeric: false,
+    disablePadding: false,
+    label: "Total",
+  },
+];
+let rows = [];
+function EnhancedTableHead(props) {
+  const {
+    classes,
+    onSelectAllClick,
+    order,
+    orderBy,
+    numSelected,
+    rowCount,
+    onRequestSort,
+  } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
 
   return (
-    <ThemeProvider theme={theme}>
-    <Box className="container" p={2.5} bgcolor="primary.lightBgContainer">
-      <Paper className="content lead-page" >
-        <Box className="page-heading" mb={3}>
-          <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
-            <Typography variant="h6" gutterBottom color="inherit">
-              Dashboard
-            </Typography>
-          </Box>
-          <Divider />
-        </Box>
-
-
-      </Paper>
-    </Box>
-  </ThemeProvider>
+    <TableHead>
+      <TableRow>
+        {/* <TableCell padding="checkbox">
+          <Checkbox
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{ "aria-label": "select all desserts" }}
+          />
+        </TableCell> */}
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? "right" : "left"}
+            padding={headCell.disablePadding ? "none" : "normal"}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : "asc"}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <span className={classes.visuallyHidden}>
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
+                </span>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
   );
 }
 
-export default Home;
-// import React from "react";
-// import {
-//   Paper, Box, Typography
-// } from "@material-ui/core";
-// import { ThemeProvider } from "@material-ui/core/styles";
-// import { theme } from '../../theme/light';
+function descendingComparator(a, b, orderBy) {
+  if (b[orderBy] < a[orderBy]) {
+    return -1;
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1;
+  }
+  return 0;
+}
 
-// import PropTypes from 'prop-types';
-// import clsx from 'clsx';
-// import { makeStyles } from '@material-ui/core/styles';
-// import {Table, Grid, TextField} from '@material-ui/core';
-// import TableBody from '@material-ui/core/TableBody';
-// import TableCell from '@material-ui/core/TableCell';
-// import TableContainer from '@material-ui/core/TableContainer';
-// import TableHead from '@material-ui/core/TableHead';
-// import TablePagination from '@material-ui/core/TablePagination';
-// import TableRow from '@material-ui/core/TableRow';
-// import TableSortLabel from '@material-ui/core/TableSortLabel';
-// import Toolbar from '@material-ui/core/Toolbar';
-// import Checkbox from '@material-ui/core/Checkbox';
-// import IconButton from '@material-ui/core/IconButton';
-// import Tooltip from '@material-ui/core/Tooltip';
-// import DeleteIcon from '@material-ui/icons/Delete';
-// import EditIcon from '@material-ui/icons/Edit';
-// import Drawer from '@material-ui/core/Drawer';
-// import Button from '@material-ui/core/Button';
-// import Divider from '@material-ui/core/Divider';
-// import CloseIcon from '@material-ui/icons/Close';
+function getComparator(order, orderBy) {
+  console.log("getComparator", order);
+  return order === "desc"
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
 
-// function createData(name, calories, fat, carbs, protein) {
-//   return { name, calories, fat, carbs, protein };
-// }
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
 
-// const rows = [
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Donut', 452, 25.0, 51, 4.9),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-//   createData('Honeycomb', 408, 3.2, 87, 6.5),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Jelly Bean', 375, 0.0, 94, 0.0),
-//   createData('KitKat', 518, 26.0, 65, 7.0),
-//   createData('Lollipop', 392, 0.2, 98, 0.0),
-//   createData('Marshmallow', 318, 0, 81, 2.0),
-//   createData('Nougat', 360, 19.0, 9, 37.0),
-//   createData('Oreo', 437, 18.0, 63, 4.0),
-// ];
+class Home extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      age: "",
+      startDate: new Date(),
+      endDate: new Date() + 1,
+      deviceuniqueid: "Web",
+      token: "339CFB64EDC6E94C5577CD68319E72AB6732C711AE661427AC83931B33F05CC4",
+      mappingList: [],
+      consolidates: "",
+      type: "Daily",
+      facilityid: "0",
+      dailyReport: [],
+      selected: [],
+      order: "asc",
+      orderBy: "calories",
+      selected: [],
+      page: 0,
+      rowsPerPage: 10,
+      names: [],
+      instanceId: "0",
+      facilityName: "Consolidate",
+      totalCheckIn: 0,
+      totalCheckOut: 0,
+      totalCash: 0,
+      totalOnline: 0,
+      totalNoCash: 0,
+      totalAmount: 0,
+      mISReport: [],
+      overallCheckin: 0,
+      overallCheckout: 0,
+      overallPayment: 0,
+    };
+  }
 
-// function descendingComparator(a, b, orderBy) {
-//   if (b[orderBy] < a[orderBy]) {
-//     return -1;
-//   }
-//   if (b[orderBy] > a[orderBy]) {
-//     return 1;
-//   }
-//   return 0;
-// }
+  componentDidMount() {
+    const { userDetails } = this.props;
+    const { loginToken, facilityid } = userDetails;
 
-// function getComparator(order, orderBy) {
-//   return order === 'desc'
-//     ? (a, b) => descendingComparator(a, b, orderBy)
-//     : (a, b) => -descendingComparator(a, b, orderBy);
-// }
+    this.setState(
+      {
+        token: loginToken,
+        // facilityid: facilityid,
+      },
+      () => {
+        this.getRefreshMapping();
 
-// function stableSort(array, comparator) {
-//   const stabilizedThis = array.map((el, index) => [el, index]);
-//   stabilizedThis.sort((a, b) => {
-//     const order = comparator(a[0], b[0]);
-//     if (order !== 0) return order;
-//     return a[1] - b[1];
-//   });
-//   return stabilizedThis.map((el) => el[0]);
-// }
+        // this.getDailyAdminParkingStatusReport();
+      }
+    );
+  }
 
-// const headCells = [
-//   { id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)' },
-//   { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
-//   { id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)' },
-//   { id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)' },
-//   { id: 'protein', numeric: true, disablePadding: false, label: 'Action' },
-// ];
+  getRefreshMapping = async () => {
+    const { deviceuniqueid, token } = this.state;
 
-// function EnhancedTableHead(props) {
-//   const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
-//   const createSortHandler = (property) => (event) => {
-//     onRequestSort(event, property);
-//   };
+    try {
+      const response = await UserService.mapping(deviceuniqueid, token);
+      const { status, data } = response;
+      const { groupmapping } = data;
+      const { data: list } = groupmapping;
+      console.log("response after getRefreshMapping --> ", response);
+      if (data && list.length > 0) {
+        let id = [];
+        let names = [];
+        list.map((item, index) => {
+          id.push(item.facilityid);
+          names.push(item.name);
+        });
+        id = id.join(",");
+        this.setState(
+          {
+            mappingList: list,
+            consolidates: id,
+            names,
+          },
+          () => {
+            this.getDailyMISAdminReport();
+          }
+        );
+      }
+    } catch (error) {
+      console.log("error getRefreshMapping", error);
+    }
+  };
 
-//   return (
-//     <TableHead>
-//       <TableRow>
-//         <TableCell padding="checkbox">
-//           <Checkbox
-//             indeterminate={numSelected > 0 && numSelected < rowCount}
-//             checked={rowCount > 0 && numSelected === rowCount}
-//             onChange={onSelectAllClick}
-//             inputProps={{ 'aria-label': 'select all desserts' }}
-//           />
-//         </TableCell>
-//         {headCells.map((headCell) => (
-//           <TableCell
-//             key={headCell.id}
-//             align={headCell.numeric ? 'right' : 'left'}
-//             padding={headCell.disablePadding ? 'none' : 'normal'}
-//             sortDirection={orderBy === headCell.id ? order : false}
-//           >
-//             <TableSortLabel
-//               active={orderBy === headCell.id}
-//               direction={orderBy === headCell.id ? order : 'asc'}
-//               onClick={createSortHandler(headCell.id)}
-//             >
-//               {headCell.label}
-//               {orderBy === headCell.id ? (
-//                 <span className={classes.visuallyHidden}>
-//                   {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-//                 </span>
-//               ) : null}
-//             </TableSortLabel>
-//           </TableCell>
-//         ))}
-//       </TableRow>
-//     </TableHead>
-//   );
-// }
+  getDailyMISAdminReport = async () => {
+    const { token, facilityid, startDate, instanceId, consolidates } =
+      this.state;
+    console.log("datattatatatatatata", facilityid, "   ", consolidates);
+    let facilityidTosend = "";
+    if (facilityid === "0") {
+      facilityidTosend = consolidates;
+    } else {
+      facilityidTosend = facilityid;
+    }
+    let inputdate = moment(startDate).format("DD-MMM-YYYY"); // 01-Oct-2022
 
-// EnhancedTableHead.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   numSelected: PropTypes.number.isRequired,
-//   onRequestSort: PropTypes.func.isRequired,
-//   onSelectAllClick: PropTypes.func.isRequired,
-//   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-//   orderBy: PropTypes.string.isRequired,
-//   rowCount: PropTypes.number.isRequired,
-// };
+    try {
+      const response = await UserService.AdminMISStatusReport(
+        facilityidTosend,
+        token,
+        inputdate
+      );
 
-// const useToolbarStyles = makeStyles((theme) => ({
-//   root: {
-//     paddingLeft: theme.spacing(2),
-//     paddingRight: theme.spacing(1),
-//   },
-//   highlight:
-//     theme.palette.type === 'light'
-//       ? {
-//           color: theme.palette.primary.light,
-//           // backgroundColor: lighten(theme.palette.primary.light, 0.85),
-//         }
-//       : {
-//           color: theme.palette.primary.light,
-//           // backgroundColor: theme.palette.primary.dark,
-//         },
-//   title: {
-//     flex: '1 1 100%',
-//   },
-// }));
+      console.log("response after getDailyMISAdminReport ", response);
+      const { data: res } = response;
+      const { data } = res;
+      if (res.respCode === 1 && data.length > 0) {
+        let totalcheckin = 0;
+        let totalcheckout = 0;
+        let totalPayment = 0;
+        let totalVehicle = 0;
+        let carIn = 0;
+        let carOut = 0;
+        let bikeIn = 0;
+        let bikeOut = 0;
+        let bicycleIn = 0;
+        let bicycleOut = 0;
+        let cashCount = 0;
+        let onlineCount = 0;
+        let noCashCount = 0;
 
-// const EnhancedTableToolbar = (props) => {
-//   const classes = useToolbarStyles();
-//   const { numSelected } = props;
+        let overallCheckin = 0;
+        let overallCheckout = 0;
+        let overallPayment = 0;
 
-//   return (
-//     <Toolbar
-//       className={clsx(classes.root, {
-//         [classes.highlight]: numSelected > 0,
-//       })}
-//     >
-//       {numSelected > 0 ? (
-//         <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-//           {numSelected} selected
-//         </Typography>
-//       ) : (
-//         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-//           Data Table
-//         </Typography>
-//       )}
+        let vehicleArray = [];
 
-//       {numSelected > 0 ? (
-//         <Tooltip title="Delete">
-//           <IconButton aria-label="delete">
-//             <DeleteIcon />
-//           </IconButton>
-//         </Tooltip>
-//       ) : (
-//         <Tooltip title="Filter list">
-//           <IconButton aria-label="filter list">
-//             {/* <FilterListIcon /> */}
-//           </IconButton>
-//         </Tooltip>
-//       )}
-//     </Toolbar>
-//   );
-// };
+        const paymentValue = {
+          2: "Cash",
+          3: "Online",
+          5: "Exempt",
+        };
+        let paymentArray = [];
 
-// EnhancedTableToolbar.propTypes = {
-//   numSelected: PropTypes.number.isRequired,
-// };
+        let amountArray = [];
 
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     width: '100%',
-//   },
-//   paper: {
-//     width: '100%',
-//     marginBottom: theme.spacing(2),
-//   },
-//   table: {
-//     minWidth: 750,
-//   },
-//   visuallyHidden: {
-//     border: 0,
-//     clip: 'rect(0 0 0 0)',
-//     height: 1,
-//     margin: -1,
-//     overflow: 'hidden',
-//     padding: 0,
-//     position: 'absolute',
-//     top: 20,
-//     width: 1,
-//   },
-// }));
+        const vechicles = {
+          1: "Bike",
+          2: "Car",
+          4: "Bicycle",
+        };
 
+        let finalArray = [];
+        for (let a = 0; a < data.length; a++) {
+          totalcheckin = 0;
+          totalcheckout = 0;
+          totalPayment = 0;
+          totalVehicle = 0;
+          carIn = 0;
+          carOut = 0;
+          bikeIn = 0;
+          bikeOut = 0;
+          bicycleIn = 0;
+          bicycleOut = 0;
+          cashCount = 0;
+          onlineCount = 0;
+          noCashCount = 0;
 
-// function Home() {
-//   const classes = useStyles();
-//   const [order, setOrder] = React.useState('asc');
-//   const [orderBy, setOrderBy] = React.useState('calories');
-//   const [selected, setSelected] = React.useState([]);
-//   const [page, setPage] = React.useState(0);
-//   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+          const { checkin, checkout, payment, facilityname } = data[a];
+          if (checkin) {
+            for (let i = 0; i < checkin.length; i++) {
+              const { vehicletype, vehiclecount } = checkin[i];
+              const vehicleName = vechicles[vehicletype];
+              const ifExist = vehicleArray.findIndex(
+                (value, index) => value === vehicleName
+              );
+              if (ifExist == -1) {
+                vehicleArray.push(vehicleName);
+              }
 
-//   const handleRequestSort = (event, property) => {
-//     const isAsc = orderBy === property && order === 'asc';
-//     setOrder(isAsc ? 'desc' : 'asc');
-//     setOrderBy(property);
-//   };
+              carIn = vehicleName == "Car" ? vehiclecount : carIn;
+              bikeIn = vehicleName == "Bike" ? vehiclecount : bikeIn;
+              bicycleIn = vehicleName == "Bicycle" ? vehiclecount : bicycleIn;
 
-//   const handleSelectAllClick = (event) => {
-//     if (event.target.checked) {
-//       const newSelecteds = rows.map((n) => n.name);
-//       setSelected(newSelecteds);
-//       return;
-//     }
-//     setSelected([]);
-//   };
+              totalcheckin = totalcheckin + vehiclecount;
+            }
+            console.log("checkin data", carIn);
+          }
+          if (checkout) {
+            for (let i = 0; i < checkout.length; i++) {
+              const { vehicletype, vehiclecount } = checkout[i];
+              const vehicleName = vechicles[vehicletype];
+              const ifExist = vehicleArray.findIndex(
+                (value, index) => value === vehicleName
+              );
+              if (ifExist == -1) {
+                vehicleArray.push(vehicleName);
+              }
 
-//   const handleClick = (event, name) => {
-//     const selectedIndex = selected.indexOf(name);
-//     let newSelected = [];
+              carOut = vehicleName == "Car" ? vehiclecount : carOut;
+              bikeOut = vehicleName == "Bike" ? vehiclecount : bikeOut;
+              bicycleOut = vehicleName == "Bicycle" ? vehiclecount : bicycleOut;
 
-//     if (selectedIndex === -1) {
-//       newSelected = newSelected.concat(selected, name);
-//     } else if (selectedIndex === 0) {
-//       newSelected = newSelected.concat(selected.slice(1));
-//     } else if (selectedIndex === selected.length - 1) {
-//       newSelected = newSelected.concat(selected.slice(0, -1));
-//     } else if (selectedIndex > 0) {
-//       newSelected = newSelected.concat(
-//         selected.slice(0, selectedIndex),
-//         selected.slice(selectedIndex + 1),
-//       );
-//     }
+              totalcheckout = totalcheckout + vehiclecount;
+            }
+          }
 
-//     setSelected(newSelected);
-//   };
+          if (payment) {
+            for (let i = 0; i < payment.length; i++) {
+              const { paymentmode, amountcollected } = payment[i];
+              const paymentName = paymentValue[paymentmode];
+              const ifExist = paymentArray.findIndex(
+                (value, index) => value === paymentName
+              );
+              if (ifExist == -1) {
+                paymentArray.push(paymentName);
+              }
 
-//   const handleChangePage = (event, newPage) => {
-//     setPage(newPage);
-//   };
+              cashCount =
+                paymentName == "Cash" ? amountcollected / 100 : cashCount;
+              onlineCount =
+                paymentName == "Online" ? amountcollected / 100 : onlineCount;
+              noCashCount =
+                paymentName == "Exempt" ? amountcollected / 100 : noCashCount;
 
-//   const handleChangeRowsPerPage = (event) => {
-//     setRowsPerPage(parseInt(event.target.value, 10));
-//     setPage(0);
-//   };
+              if (cashCount !== 0) {
+                amountArray.push(cashCount);
+              } else if (onlineCount !== 0) {
+                amountArray.push(onlineCount);
+              } else if (noCashCount !== 0) {
+                amountArray.push(noCashCount);
+              }
 
+              if (paymentmode !== 5) {
+                totalPayment = totalPayment + amountcollected / 100;
+              }
+            }
+          }
 
-//   const isSelected = (name) => selected.indexOf(name) !== -1;
+          overallCheckin = overallCheckin + totalcheckin;
+          overallCheckout = overallCheckout + totalcheckout;
+          overallPayment = overallPayment + totalPayment;
+          let objectToShow = {
+            facilityNameToShow: facilityname,
+            totalCarin: carIn,
+            totalCarout: carOut,
+            totalBikein: bikeIn,
+            totalBikeout: bikeOut,
+            totalBicyclein: bicycleIn,
+            totalBicycleout: bicycleOut,
+            totalPayment,
+            totalcheckin,
+            totalcheckout,
+          };
 
-//   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+          finalArray.push(objectToShow);
+        }
 
+        this.setState({
+          dailyReport: finalArray,
+          overallCheckin,
+          overallCheckout,
+          overallPayment,
+          totalCheckIn: totalcheckin,
+          totalCheckOut: totalcheckout,
+          totalCash: cashCount,
+          totalOnline: onlineCount,
+          totalNoCash: noCashCount,
+          totalAmount: totalPayment,
+        });
+      }
+    } catch (error) {
+      console.log("error getDailyMISAdminReport", error);
+    }
+  };
 
+  getMonthlyMISAdminReport = async () => {
+    const { token, facilityid, startDate, instanceId, consolidates } =
+      this.state;
 
-// // Drawer start here
+    let facilityidTosend = "";
+    if (facilityid === "0") {
+      facilityidTosend = consolidates;
+    } else {
+      facilityidTosend = facilityid;
+    }
+    let inputdate = moment(startDate).format("MMM-YYYY"); // 01-Oct-2022
 
-//   const [state, setState] = React.useState({
-//     top: false,
-//     left: false,
-//     bottom: false,
-//     right: false,
-//   });
+    try {
+      const response = await UserService.AdminMonthlyMISStatusReport(
+        facilityidTosend,
+        token,
+        inputdate
+      );
 
-//   const toggleDrawer = (anchor, open) => (event) => {
-//     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-//       return;
-//     }
+      console.log("response after getMonthlyMISAdminReport ", response);
 
-//     setState({ ...state, [anchor]: open });
-//   };
+      const { data: res } = response;
+      const { data } = res;
+      if (res.respCode === 1 && data.length > 0) {
+        let totalcheckin = 0;
+        let totalcheckout = 0;
+        let totalPayment = 0;
+        let totalVehicle = 0;
+        let carIn = 0;
+        let carOut = 0;
+        let bikeIn = 0;
+        let bikeOut = 0;
+        let bicycleIn = 0;
+        let bicycleOut = 0;
+        let cashCount = 0;
+        let onlineCount = 0;
+        let noCashCount = 0;
 
-//   const list = (anchor) => (
-//     <Box className="share-steps" height="100%">
-//     <Box   display="flex"
-//         width="100%"
-//         height="100%"
-//         flexDirection="column"
-//         bgcolor="primary.drawerBg"
-//       className={clsx(classes.list, {
-//         [classes.fullList]: anchor === 'top' || anchor === 'bottom',
-//       })}
-//       role="presentation"
-    
-//     >
-//       <Box className="common-content" position="relative" height="100%">
-//           <Box className="sidebar-header" display="flex" alignItems="center" px={3} py={2.4}>
-//             <Box color="text.textBlue">
-//               <Typography variant="h6" gutterBottom color="inherit">
-//                 Edit
-//               </Typography>
-//             </Box>
-//             <Box
-//               className="close-drawer cursor-pointer"
-//               display="flex"
-//               alignItems="center"
-//               color="grey.500"
-//               onClick={toggleDrawer(anchor, false)}>
-//               <CloseIcon color="inherit" />
-//             </Box>
-//           </Box>
-//           <Divider />
+        let overallCheckin = 0;
+        let overallCheckout = 0;
+        let overallPayment = 0;
 
-//           <Box className="share-sidebar-content share-mamber-content" p={3}>
-//           <Grid container spacing={2}>
-//             <Grid item xs={4}>
-//               <TextField type="text" label="First Name" variant="outlined" className="custom-textfield" />
-//             </Grid>
-//             <Grid item xs={4}>
-//               <TextField type="text" label="Last Name" variant="outlined" className="custom-textfield" />
-//             </Grid>
-//             <Grid item xs={4}>
-//               <TextField type="text" label="Email Address" variant="outlined" className="custom-textfield" />
-//             </Grid>
-//           </Grid>
+        let vehicleArray = [];
 
-//             <Box>
-            
-//             </Box>
-//           </Box>
+        const paymentValue = {
+          2: "Cash",
+          3: "Online",
+          5: "Exempt",
+        };
+        let paymentArray = [];
 
-//           <Box
-//           className="sidebar-footer"
-//           position="absolute"
-//           bottom="0"
-//           left="0"
-//           width="100%"
-//           minHeight="82px"
-//           px={3}
-//           py={1.5}
-//           display="flex"
-//           alignItems="center"
-//           boxSizing="border-box"
-//           bgcolor="primary.drawerBg">
-//           <Box  pr={1} width="150px" boxSizing="border-box">
-//             <Button variant="outlined" className="cancel-button" disableElevation size="large" onClick={toggleDrawer(anchor, false)}>
-//               Cancel
-//             </Button>
-//           </Box>
-//           <Box width="150px" boxSizing="border-box">
-//             <Button variant="contained" color="primary" className="next-button" disableElevation size="large">
-//               Update
-//             </Button>
-//           </Box>
-//         </Box>
-//         </Box>
-//     </Box>
-//     </Box>
+        let amountArray = [];
 
-//     // Drawer End here
-//     )
-//   return (
-//     <ThemeProvider theme={theme}>
-//     <Box className="container" p={2.5}  bgcolor="primary.lightBgContainer">
-//       <Paper className="content lead-page" >
-//         {/* <Box className="page-heading" mb={3}>
-//           <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
-//             <Typography variant="h6" gutterBottom color="inherit">
-//               Dashboard
-//             </Typography>
-//           </Box>
-//           <Divider />
-//         </Box> */}
+        const vechicles = {
+          1: "Bike",
+          2: "Car",
+          4: "Bicycle",
+        };
 
+        let finalArray = [];
+        for (let a = 0; a < data.length; a++) {
+          totalcheckin = 0;
+          totalcheckout = 0;
+          totalPayment = 0;
+          totalVehicle = 0;
+          carIn = 0;
+          carOut = 0;
+          bikeIn = 0;
+          bikeOut = 0;
+          bicycleIn = 0;
+          bicycleOut = 0;
+          cashCount = 0;
+          onlineCount = 0;
+          noCashCount = 0;
 
-// <div className="data-table">
-// <div className={classes.root}>
-//       <Paper className={classes.paper} elevation={0}>
-//         <EnhancedTableToolbar numSelected={selected.length} />
-//         <TableContainer>
-//           <Table
-//             className={classes.table}
-//             aria-labelledby="tableTitle"
-//             aria-label="enhanced table"
-//           >
-//             <EnhancedTableHead
-//               classes={classes}
-//               numSelected={selected.length}
-//               order={order}
-//               orderBy={orderBy}
-//               onSelectAllClick={handleSelectAllClick}
-//               onRequestSort={handleRequestSort}
-//               rowCount={rows.length}
-//             />
-//             <TableBody>
-//               {stableSort(rows, getComparator(order, orderBy))
-//                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-//                 .map((row, index) => {
-//                   const isItemSelected = isSelected(row.name);
-//                   const labelId = `enhanced-table-checkbox-${index}`;
+          const { checkin, checkout, payment, facilityname } = data[a];
+          if (checkin) {
+            for (let i = 0; i < checkin.length; i++) {
+              const { vehicletype, vehiclecount } = checkin[i];
+              const vehicleName = vechicles[vehicletype];
+              const ifExist = vehicleArray.findIndex(
+                (value, index) => value === vehicleName
+              );
+              if (ifExist == -1) {
+                vehicleArray.push(vehicleName);
+              }
 
-//                   return (
-//                     <TableRow
-//                       hover
-//                       onClick={(event) => handleClick(event, row.name)}
-//                       role="checkbox"
-//                       aria-checked={isItemSelected}
-//                       tabIndex={-1}
-//                       key={row.name}
-//                       selected={isItemSelected}
-//                     >
-//                       <TableCell padding="checkbox">
-//                         <Checkbox
-//                           checked={isItemSelected}
-//                           inputProps={{ 'aria-labelledby': labelId }}
-//                         />
-//                       </TableCell>
-//                       <TableCell component="th" id={labelId} scope="row" padding="none">
-//                         {row.name}
-//                       </TableCell>
-//                       <TableCell align="right">{row.calories}</TableCell>
-//                       <TableCell align="right">{row.fat}</TableCell>
-//                       <TableCell align="right">{row.carbs}</TableCell>
-//                       <TableCell align="right">
-// <Box display="inline-flex" alignItems="center" ml="auto">
-//   <Box className="edit-icon cursor-pointer" mr={1} bgcolor="primary.primaryIconBg" color="text.textSecondary"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-//     <EditIcon style={{ fontSize: 18 }} color="inherit" />
-//     </Box>
-//     <Box className="edit-icon cursor-pointer" bgcolor="error.lightIcon" color="error.dark"  width="27px" height="27px" borderRadius="5px" display="flex" alignItems="center" justifyContent="center">
-//     <DeleteIcon style={{ fontSize: 18 }} color="inherit" />
-//     </Box>
-// </Box>
-//                       </TableCell>
-//                     </TableRow>
-//                   );
-//                 })}
-//               {emptyRows > 0 && (
-//                 <TableRow >
-//                   <TableCell colSpan={6} />
-//                 </TableRow>
-//               )}
-//             </TableBody>
-//           </Table>
-//         </TableContainer>
-//         <TablePagination
-//           rowsPerPageOptions={[5, 10, 25]}
-//           component="div"
-//           count={rows.length}
-//           rowsPerPage={rowsPerPage}
-//           page={page}
-//           onPageChange={handleChangePage}
-//           onRowsPerPageChange={handleChangeRowsPerPage}
-//         />
-//       </Paper>
-     
-//     </div>
-// </div>
+              carIn = vehicleName == "Car" ? vehiclecount : carIn;
+              bikeIn = vehicleName == "Bike" ? vehiclecount : bikeIn;
+              bicycleIn = vehicleName == "Bicycle" ? vehiclecount : bicycleIn;
 
-// {/* Drawer Map here */}
-// <div>
-//       {['right'].map((anchor) => (
-//         <React.Fragment key={anchor}>
-//           <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button>
-//           <Drawer className="common-sidebar " anchor={anchor} open={state[anchor]} onClose={toggleDrawer(anchor, false)}>
-//             {list(anchor)}
-//           </Drawer>
-//         </React.Fragment>
-//       ))}
-//     </div>
+              totalcheckin = totalcheckin + vehiclecount;
+            }
+            console.log("checkin data", carIn);
+          }
+          if (checkout) {
+            for (let i = 0; i < checkout.length; i++) {
+              const { vehicletype, vehiclecount } = checkout[i];
+              const vehicleName = vechicles[vehicletype];
+              const ifExist = vehicleArray.findIndex(
+                (value, index) => value === vehicleName
+              );
+              if (ifExist == -1) {
+                vehicleArray.push(vehicleName);
+              }
 
-//     {/* Drawer Map here */}
-//       </Paper>
-//     </Box>
-//   </ThemeProvider>
-//   );
-// }
+              carOut = vehicleName == "Car" ? vehiclecount : carOut;
+              bikeOut = vehicleName == "Bike" ? vehiclecount : bikeOut;
+              bicycleOut = vehicleName == "Bicycle" ? vehiclecount : bicycleOut;
 
-// export default Home;
+              totalcheckout = totalcheckout + vehiclecount;
+            }
+          }
+
+          if (payment) {
+            for (let i = 0; i < payment.length; i++) {
+              const { paymentmode, amountcollected } = payment[i];
+              const paymentName = paymentValue[paymentmode];
+              const ifExist = paymentArray.findIndex(
+                (value, index) => value === paymentName
+              );
+              if (ifExist == -1) {
+                paymentArray.push(paymentName);
+              }
+
+              cashCount =
+                paymentName == "Cash" ? amountcollected / 100 : cashCount;
+              onlineCount =
+                paymentName == "Online" ? amountcollected / 100 : onlineCount;
+              noCashCount =
+                paymentName == "Exempt" ? amountcollected / 100 : noCashCount;
+
+              if (cashCount !== 0) {
+                amountArray.push(cashCount);
+              } else if (onlineCount !== 0) {
+                amountArray.push(onlineCount);
+              } else if (noCashCount !== 0) {
+                amountArray.push(noCashCount);
+              }
+
+              if (paymentmode !== 5) {
+                totalPayment = totalPayment + amountcollected / 100;
+              }
+            }
+          }
+
+          overallCheckin = overallCheckin + totalcheckin;
+          overallCheckout = overallCheckout + totalcheckout;
+          overallPayment = overallPayment + totalPayment;
+          let objectToShow = {
+            facilityNameToShow: facilityname,
+            totalCarin: carIn,
+            totalCarout: carOut,
+            totalBikein: bikeIn,
+            totalBikeout: bikeOut,
+            totalBicyclein: bicycleIn,
+            totalBicycleout: bicycleOut,
+            totalPayment,
+            totalcheckin,
+            totalcheckout,
+          };
+
+          finalArray.push(objectToShow);
+        }
+
+        this.setState({
+          dailyReport: finalArray,
+          overallCheckin,
+          overallCheckout,
+          overallPayment,
+          totalCheckIn: totalcheckin,
+          totalCheckOut: totalcheckout,
+          totalCash: cashCount,
+          totalOnline: onlineCount,
+          totalNoCash: noCashCount,
+          totalAmount: totalPayment,
+        });
+      }
+    } catch (error) {
+      console.log("error getMonthlyMISAdminReport", error);
+    }
+  };
+
+  // getDailyAdminParkingStatusReport = async () => {
+  //   const { token, facilityid, startDate } = this.state;
+
+  //   let inputdatetime = moment(startDate).format("DD-MMM-YYYY"); // 01-Oct-2022
+
+  //   try {
+  //     const response = await UserService.AdminParkingStatusReport(
+  //       facilityid,
+  //       token,
+  //       inputdatetime
+  //     );
+
+  //     console.log("response after getDailyAdminParkingStatusReport ", response);
+  //     const { data: res } = response;
+  //     if (res.respCode === 1 && res) {
+  //       const { checkin, checkout, payment } = res;
+
+  //       let totalcheckin = 0;
+  //       let totalcheckout = 0;
+  //       let totalPayment = 0;
+  //       let totalVehicle = 0;
+  //       let carIn = 0;
+  //       let carOut = 0;
+  //       let bikeIn = 0;
+  //       let bikeOut = 0;
+  //       let bicycleIn = 0;
+  //       let bicycleOut = 0;
+  //       let autoIn = 0;
+  //       let autoOut = 0;
+
+  //       let vehicleArray = [];
+  //       const vechicles = {
+  //         1: "Bike",
+  //         2: "Car",
+  //         3: "Auto",
+  //         4: "Bicycle",
+  //       };
+  //       if (checkin) {
+  //         for (let i = 0; i < checkin.length; i++) {
+  //           const { vehicletype, vehiclecount } = checkin[i];
+  //           const vehicleName = vechicles[vehicletype];
+  //           const ifExist = vehicleArray.findIndex(
+  //             (value, index) => value === vehicleName
+  //           );
+  //           if (ifExist == -1) {
+  //             vehicleArray.push(vehicleName);
+  //           }
+
+  //           carIn = vehicleName == "Car" ? vehiclecount : carIn;
+  //           bikeIn = vehicleName == "Bike" ? vehiclecount : bikeIn;
+  //           bicycleIn = vehicleName == "Bicycle" ? vehiclecount : bicycleIn;
+  //           autoIn = vehicleName == "Auto" ? vehiclecount : autoIn;
+
+  //           totalcheckin = totalcheckin + vehiclecount;
+  //         }
+  //         console.log("checkin data", carIn);
+  //       }
+  //       if (checkout) {
+  //         for (let i = 0; i < checkout.length; i++) {
+  //           const { vehicletype, vehiclecount } = checkout[i];
+  //           const vehicleName = vechicles[vehicletype];
+  //           const ifExist = vehicleArray.findIndex(
+  //             (value, index) => value === vehicleName
+  //           );
+  //           if (ifExist == -1) {
+  //             vehicleArray.push(vehicleName);
+  //           }
+
+  //           carOut = vehicleName == "Car" ? vehiclecount : carOut;
+  //           bikeOut = vehicleName == "Bike" ? vehiclecount : bikeOut;
+  //           bicycleOut = vehicleName == "Bicycle" ? vehiclecount : bicycleOut;
+  //           autoOut = vehicleName == "Auto" ? vehiclecount : autoOut;
+
+  //           totalcheckout = totalcheckout + vehiclecount;
+  //         }
+  //       }
+
+  //       const paymentValue = {
+  //         2: "Cash",
+  //         3: "Online",
+  //         5: "Exempt",
+  //       };
+  //       let paymentArray = [];
+  //       // let colorArray = [(opacity = 1) => `#2E7D32`,(opacity = 1) => `#FD0002`,(opacity = 1) => `#00266B`];
+  //       let colorArray = [];
+
+  //       let amountArray = [];
+  //       let cashCount = 0;
+  //       let onlineCount = 0;
+  //       let noCashCount = 0;
+
+  //       if (payment) {
+  //         for (let i = 0; i < payment.length; i++) {
+  //           const { paymentmode, amountcollected } = payment[i];
+  //           const paymentName = paymentValue[paymentmode];
+  //           const ifExist = paymentArray.findIndex(
+  //             (value, index) => value === paymentName
+  //           );
+  //           if (ifExist == -1) {
+  //             paymentArray.push(paymentName);
+  //           }
+
+  //           cashCount =
+  //             paymentName == "Cash" ? amountcollected / 100 : cashCount;
+  //           onlineCount =
+  //             paymentName == "Online" ? amountcollected / 100 : onlineCount;
+  //           noCashCount =
+  //             paymentName == "Exempt" ? amountcollected / 100 : noCashCount;
+
+  //           if (cashCount !== 0) {
+  //             amountArray.push(cashCount);
+  //           } else if (onlineCount !== 0) {
+  //             amountArray.push(onlineCount);
+  //           } else if (noCashCount !== 0) {
+  //             amountArray.push(noCashCount);
+  //           }
+  //           if (paymentmode === 2) {
+  //             colorArray.push((opacity = 1) => `#2E7D32`);
+  //           } else if (paymentmode === 3) {
+  //             colorArray.push((opacity = 1) => `#FD0002`);
+  //           } else if (paymentmode === 5) {
+  //             colorArray.push((opacity = 1) => `#00266B`);
+  //           }
+  //           if (paymentmode !== 5) {
+  //             totalPayment = totalPayment + amountcollected / 100;
+  //           }
+  //         }
+  //       }
+
+  //       let finalArray = [];
+
+  //       let objCar = {
+  //         name: "Car",
+  //         totalin: carIn,
+  //         totalout: carOut,
+  //       };
+  //       finalArray.push(objCar);
+  //       let objBike = {
+  //         name: "Bike",
+  //         totalin: bikeIn,
+  //         totalout: bikeOut,
+  //       };
+  //       finalArray.push(objBike);
+  //       let objBicycle = {
+  //         name: "Bicycle",
+  //         totalin: bicycleIn,
+  //         totalout: bicycleOut,
+  //       };
+  //       finalArray.push(objBicycle);
+
+  //       this.setState({
+  //         dailyReport: finalArray,
+  //         totalCheckIn: totalcheckin,
+  //         totalCheckOut: totalcheckout,
+  //         totalCash: cashCount,
+  //         totalOnline: onlineCount,
+  //         totalNoCash: noCashCount,
+  //         totalAmount: totalPayment,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log("error getDailyAdminParkingStatusReport", error);
+  //   }
+  // };
+
+  // getMonthlyAdminParkingStatusReport = async (inputdate) => {
+  //   const { token, facilityid, startDate } = this.state;
+  //   let inputdatetime = moment(inputdate).format("MMM-YYYY"); // 01-Oct-2022
+
+  //   try {
+  //     const response = await UserService.AdminMonthlyParkingStatusReport(
+  //       facilityid,
+  //       token,
+  //       inputdatetime
+  //     );
+
+  //     console.log(
+  //       "response after getMonthlyAdminParkingStatusReport ",
+  //       response
+  //     );
+  //     const { data: res } = response;
+  //     if (res.respCode === 1 && res) {
+  //       const { checkin, checkout, payment } = res;
+
+  //       let totalcheckin = 0;
+  //       let totalcheckout = 0;
+  //       let totalPayment = 0;
+  //       let totalVehicle = 0;
+  //       let carIn = 0;
+  //       let carOut = 0;
+  //       let bikeIn = 0;
+  //       let bikeOut = 0;
+  //       let bicycleIn = 0;
+  //       let bicycleOut = 0;
+  //       let autoIn = 0;
+  //       let autoOut = 0;
+
+  //       let vehicleArray = [];
+  //       const vechicles = {
+  //         1: "Bike",
+  //         2: "Car",
+  //         3: "Auto",
+  //         4: "Bicycle",
+  //       };
+  //       if (checkin) {
+  //         for (let i = 0; i < checkin.length; i++) {
+  //           const { vehicletype, vehiclecount } = checkin[i];
+  //           const vehicleName = vechicles[vehicletype];
+  //           const ifExist = vehicleArray.findIndex(
+  //             (value, index) => value === vehicleName
+  //           );
+  //           if (ifExist == -1) {
+  //             vehicleArray.push(vehicleName);
+  //           }
+
+  //           carIn = vehicleName == "Car" ? vehiclecount : carIn;
+  //           bikeIn = vehicleName == "Bike" ? vehiclecount : bikeIn;
+  //           bicycleIn = vehicleName == "Bicycle" ? vehiclecount : bicycleIn;
+  //           autoIn = vehicleName == "Auto" ? vehiclecount : autoIn;
+
+  //           totalcheckin = totalcheckin + vehiclecount;
+  //         }
+  //         console.log("checkin data", carIn);
+  //       }
+  //       if (checkout) {
+  //         for (let i = 0; i < checkout.length; i++) {
+  //           const { vehicletype, vehiclecount } = checkout[i];
+  //           const vehicleName = vechicles[vehicletype];
+  //           const ifExist = vehicleArray.findIndex(
+  //             (value, index) => value === vehicleName
+  //           );
+  //           if (ifExist == -1) {
+  //             vehicleArray.push(vehicleName);
+  //           }
+
+  //           carOut = vehicleName == "Car" ? vehiclecount : carOut;
+  //           bikeOut = vehicleName == "Bike" ? vehiclecount : bikeOut;
+  //           bicycleOut = vehicleName == "Bicycle" ? vehiclecount : bicycleOut;
+  //           autoOut = vehicleName == "Auto" ? vehiclecount : autoOut;
+
+  //           totalcheckout = totalcheckout + vehiclecount;
+  //         }
+  //       }
+
+  //       const paymentValue = {
+  //         2: "Cash",
+  //         3: "Online",
+  //         5: "Exempt",
+  //       };
+  //       let paymentArray = [];
+  //       // let colorArray = [(opacity = 1) => `#2E7D32`,(opacity = 1) => `#FD0002`,(opacity = 1) => `#00266B`];
+  //       let colorArray = [];
+
+  //       let amountArray = [];
+  //       let cashCount = 0;
+  //       let onlineCount = 0;
+  //       let noCashCount = 0;
+
+  //       if (payment) {
+  //         for (let i = 0; i < payment.length; i++) {
+  //           const { paymentmode, amountcollected } = payment[i];
+  //           const paymentName = paymentValue[paymentmode];
+  //           const ifExist = paymentArray.findIndex(
+  //             (value, index) => value === paymentName
+  //           );
+  //           if (ifExist == -1) {
+  //             paymentArray.push(paymentName);
+  //           }
+
+  //           cashCount =
+  //             paymentName == "Cash" ? amountcollected / 100 : cashCount;
+  //           onlineCount =
+  //             paymentName == "Online" ? amountcollected / 100 : onlineCount;
+  //           noCashCount =
+  //             paymentName == "Exempt" ? amountcollected / 100 : noCashCount;
+
+  //           if (cashCount !== 0) {
+  //             amountArray.push(cashCount);
+  //           } else if (onlineCount !== 0) {
+  //             amountArray.push(onlineCount);
+  //           } else if (noCashCount !== 0) {
+  //             amountArray.push(noCashCount);
+  //           }
+  //           if (paymentmode === 2) {
+  //             colorArray.push((opacity = 1) => `#2E7D32`);
+  //           } else if (paymentmode === 3) {
+  //             colorArray.push((opacity = 1) => `#FD0002`);
+  //           } else if (paymentmode === 5) {
+  //             colorArray.push((opacity = 1) => `#00266B`);
+  //           }
+  //           if (paymentmode !== 5) {
+  //             totalPayment = totalPayment + amountcollected / 100;
+  //           }
+  //         }
+  //       }
+
+  //       let finalArray = [];
+
+  //       let objCar = {
+  //         name: "Car",
+  //         totalin: carIn,
+  //         totalout: carOut,
+  //       };
+  //       finalArray.push(objCar);
+  //       let objBike = {
+  //         name: "Bike",
+  //         totalin: bikeIn,
+  //         totalout: bikeOut,
+  //       };
+  //       finalArray.push(objBike);
+  //       let objBicycle = {
+  //         name: "Bicycle",
+  //         totalin: bicycleIn,
+  //         totalout: bicycleOut,
+  //       };
+  //       finalArray.push(objBicycle);
+
+  //       this.setState({
+  //         dailyReport: finalArray,
+  //         totalCheckIn: totalcheckin,
+  //         totalCheckOut: totalcheckout,
+  //         totalCash: cashCount,
+  //         totalOnline: onlineCount,
+  //         totalNoCash: noCashCount,
+  //         totalAmount: totalPayment,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log("error getMonthlyAdminParkingStatusReport", error);
+  //   }
+  // };
+
+  handleChange = (event) => {
+    const { mappingList, type } = this.state;
+
+    console.log("first", event.target.value);
+    let name = "";
+    for (let i = 0; i < mappingList.length; i++) {
+      console.log("first", mappingList[i]["facilityid"]);
+      if (event.target.value === mappingList[i]["facilityid"]) {
+        name = mappingList[i]["name"];
+      }
+    }
+    if (!name) {
+      name = "Consolidate";
+    }
+    console.log("name", name);
+    this.setState(
+      {
+        facilityid: event.target.value,
+        facilityName: name,
+        dailyReport: [],
+        totalCheckIn: 0,
+        totalCheckOut: 0,
+        totalCash: 0,
+        totalOnline: 0,
+        totalNoCash: 0,
+        totalAmount: 0,
+        overallCheckin: 0,
+        overallCheckout: 0,
+        overallPayment: 0,
+      },
+      () => {
+        if (type === "Daily") {
+          this.getDailyMISAdminReport();
+          // this.getDailyAdminParkingStatusReport();
+        } else {
+          // this.getMonthlyAdminParkingStatusReport();
+          this.getMonthlyMISAdminReport();
+        }
+      }
+    );
+  };
+
+  handleTypeChange = (event) => {
+    this.setState(
+      {
+        type: event.target.value,
+        dailyReport: [],
+        totalCheckIn: 0,
+        totalCheckOut: 0,
+        totalCash: 0,
+        totalOnline: 0,
+        totalNoCash: 0,
+        totalAmount: 0,
+        overallCheckin: 0,
+        overallCheckout: 0,
+        overallPayment: 0,
+      },
+      () => {
+        if (event.target.value === "Daily") {
+          //this.getDailyAdminParkingStatusReport();
+          this.getDailyMISAdminReport();
+        } else {
+          // this.getMonthlyAdminParkingStatusReport();
+          this.getMonthlyMISAdminReport();
+        }
+      }
+    );
+  };
+
+  handleDateChange = (date) => {
+    const { type } = this.state;
+    console.log(date);
+    this.setState(
+      {
+        startDate: date,
+        dailyReport: [],
+        totalCheckIn: 0,
+        totalCheckOut: 0,
+        totalCash: 0,
+        totalOnline: 0,
+        totalNoCash: 0,
+        totalAmount: 0,
+        overallCheckin: 0,
+        overallCheckout: 0,
+        overallPayment: 0,
+        //endDate: date + 1,
+      },
+      () => {
+        if (type === "Daily") {
+          //this.getDailyAdminParkingStatusReport();
+          this.getDailyMISAdminReport();
+        } else {
+          // this.getMonthlyAdminParkingStatusReport();
+          this.getMonthlyMISAdminReport();
+        }
+      }
+    );
+  };
+  handleEndDateChange = (date) => {
+    this.setState({
+      endDate: date,
+    });
+  };
+
+  handleRequestSort = (event, property) => {
+    const { orderBy, order } = this.state;
+    const isAsc = orderBy === property && order === "asc";
+    this.setState({
+      order: isAsc ? "desc" : "asc",
+    });
+    this.setState({
+      orderBy: property,
+    });
+  };
+
+  handleSelectAllClick = (event) => {
+    const { allBranch } = this.state;
+    if (event.target.checked) {
+      const newSelecteds = allBranch.map((n) => n.id);
+
+      this.setState({
+        selected: newSelecteds,
+      });
+      return;
+    }
+    this.setState({ selected: [] });
+  };
+
+  handleClick = (event, name) => {
+    const { selected } = this.state;
+    console.log(selected);
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+
+    this.setState({
+      selected: newSelected,
+    });
+  };
+
+  handleChangePage = (event, newPage) => {
+    this.setState({ page: newPage });
+  };
+
+  handleChangeRowsPerPage = (event) => {
+    this.setState({ rowsPerPage: parseInt(event.target.value, 10) });
+
+    this.setState({ page: 0 });
+  };
+
+  render() {
+    const { classes } = this.props;
+    const {
+      instanceId,
+      startDate,
+      endDate,
+      mappingList,
+      type,
+      rowsPerPage,
+      page,
+      selected,
+      orderBy,
+      order,
+      dailyReport,
+      facilityName,
+      totalCheckIn,
+      totalCheckOut,
+      totalCash,
+      totalOnline,
+      totalNoCash,
+      totalAmount,
+      overallCheckin,
+      overallCheckout,
+      overallPayment,
+      facilityid,
+    } = this.state;
+
+    console.log("dailyReportdailyReportdailyReport", dailyReport);
+    const rows = dailyReport;
+    const emptyRows =
+      rowsPerPage -
+      Math.min(rowsPerPage, dailyReport.length - page * rowsPerPage);
+
+    const isSelected = (id) => selected.indexOf(id) !== -1;
+
+    console.log("mappingList", mappingList, " type", type);
+    return (
+      <ThemeProvider theme={theme}>
+        <Box className="container" p={2.5} bgcolor="primary.lightBgContainer">
+          <Paper className="content lead-page">
+            <Box className="page-heading" mb={3}>
+              <Box color="text.secondary" pt={3} pr={2.7} pb={1.8} pl={3}>
+                <Typography variant="h6" gutterBottom color="inherit">
+                  Dashboard
+                </Typography>
+              </Box>
+              <Divider />
+            </Box>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <Grid container justifyContent="space-evenly">
+                <FormControl variant="standard" className={classes.formControl}>
+                  <InputLabel htmlFor="age-native-simple">
+                    Select Facility
+                  </InputLabel>
+                  <Select
+                    native
+                    value={facilityid}
+                    placeholder={"Facility Name"}
+                    onChange={(e, index) => {
+                      this.handleChange(e);
+                    }}
+                  >
+                    <option value="0">Consolidated</option>
+
+                    {mappingList.map((data, index) => {
+                      return (
+                        <option key={index.toString()} value={data.facilityid}>
+                          {data.name}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <FormControl variant="standard" className={classes.formControl}>
+                  <InputLabel htmlFor="age-native-simple">
+                    Select Type
+                  </InputLabel>
+                  <Select
+                    native
+                    value={type}
+                    placeholder={"Age"}
+                    onChange={(e) => this.handleTypeChange(e)}
+                  >
+                    {/* <option aria-label="None" value="NA" /> */}
+                    <option value={"Daily"}>Daily</option>
+                    <option value={"Monthly"}>Monthly</option>
+                  </Select>
+                </FormControl>
+
+                <KeyboardDatePicker
+                  disableToolbar
+                  variant="inline"
+                  format="dd/MM/yyyy"
+                  margin="normal"
+                  id="date-picker-inline"
+                  label="Date"
+                  value={startDate}
+                  onChange={(date) => this.handleDateChange(date)}
+                  KeyboardButtonProps={{
+                    "aria-label": "change date",
+                  }}
+                />
+                {/* <KeyboardDatePicker
+                  disableToolbar
+                  variant="inline"
+                  format="dd/MM/yyyy"
+                  margin="normal"
+                  id="date-picker-inline"
+                  label="End Date"
+                  minDate={startDate}
+                  value={endDate}
+                  onChange={(date) => this.handleEndDateChange(date)}
+                  KeyboardButtonProps={{
+                    "aria-label": "change date",
+                  }}
+                /> */}
+                {/* <div className={classes.root}>
+                  <Button variant="contained" size="small" color="primary">
+                    Submit
+                  </Button>
+                </div> */}
+              </Grid>
+            </MuiPickersUtilsProvider>
+
+            {/* <div className="data-table">
+              <div className={classes.roots}>
+                <Paper className={classes.papers} elevation={0}>
+                  <TableContainer>
+                    <Table
+                      className={classes.table}
+                      aria-labelledby="tableTitle"
+                      aria-label="enhanced table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                          {headCells.map((headCell) => (
+                            <TableCell
+                              key={headCell.id}
+                              align={"left"}
+                              padding={"none"}
+                            >
+                              <TableSortLabel>{headCell.label}</TableSortLabel>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {rows.map((Lead, index) => {
+                          console.log("first", Lead);
+                          const isItemSelected = isSelected(Lead.id);
+                          const labelId = `enhanced-table-checkbox-${index}`;
+
+                          return (
+                            <TableRow
+                              hover
+                              tabIndex={-1}
+                              key={index}
+                              selected={isItemSelected}
+                            >
+                              <TableCell
+                                component="th"
+                                id={labelId}
+                                scope="row"
+                                padding="none"
+                                align="left"
+                                color="green"
+                              >
+                                {facilityName}
+                              </TableCell>
+                              <TableCell
+                                component="th"
+                                id={labelId}
+                                scope="row"
+                                padding="none"
+                                align="left"
+                                color="green"
+                              >
+                                {Lead.name}
+                              </TableCell>
+                              <TableCell align="left">{Lead.totalin}</TableCell>
+                              <TableCell align="left">
+                                {Lead.totalout}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                        {instanceId ? null : (
+                          <TableRow>
+                            <TableCell colSpan={1}>Total</TableCell>
+                            <TableCell align="left">{totalCheckIn}</TableCell>
+                            <TableCell align="left">{totalCheckOut}</TableCell>
+                            <TableCell align="left">{totalAmount}</TableCell>
+                          </TableRow>
+                        )}
+
+                        <TableRow>
+                          <TableCell>Tax</TableCell>
+                          <TableCell align="right">rate</TableCell>
+                          <TableCell align="right">ohh</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell colSpan={2}>Total</TableCell>
+                          <TableCell align="right">ok</TableCell>
+                        </TableRow>
+                        {emptyRows > 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} />
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
+              </div>
+            </div> */}
+            <div>
+              <ReactHTMLTableToExcel
+                id="test-table-xls-button"
+                className="download-table-xls-button"
+                table="emp"
+                filename="tablexls"
+                sheet="tablexls"
+                buttonText="Download as XLS"
+              />
+
+              <table id="emp" className="table all_domain_table">
+                <thead className="text-white bg-gray-700">
+                  <tr>
+                    <th className="above-column">Facility Name</th>
+
+                    <th colspan="3" className="above-column">
+                      Total Check In
+                    </th>
+
+                    <th colspan="3" className="above-column">
+                      Total Check Out
+                    </th>
+
+                    <th className="above-column">Payment (Rs)</th>
+                  </tr>
+                </thead>
+                {rows.map((data, index) => {
+                  console.log("dataToLoad", data);
+                  const {
+                    facilityNameToShow,
+                    totalBicyclein,
+                    totalBicycleout,
+                    totalBikein,
+                    totalBikeout,
+                    totalCarin,
+                    totalCarout,
+                    totalPayment,
+                    totalcheckin,
+                    totalcheckout,
+                  } = data;
+                  return (
+                    <>
+                      <tr>
+                        <td rowspan="2">{facilityNameToShow}</td>
+                        <td colspan="3">{totalcheckin}</td>
+                        <td colspan="3">{totalcheckout}</td>
+                        <td rowspan="2">{totalPayment}</td>
+                      </tr>
+                      <tr>
+                        <td>Car: {totalCarin}</td>
+                        <td>Bike: {totalBikein}</td>
+                        <td>Bicycle: {totalBicyclein}</td>
+                        <td>Car: {totalCarout}</td>
+                        <td>Bike: {totalBikeout}</td>
+                        <td>Bicycle: {totalBicycleout}</td>
+                      </tr>
+                    </>
+                  );
+                })}
+                {rows && rows.length > 1 ? (
+                  <tfoot>
+                    <tr>
+                      <td className="align-middle " colSpan={1}>
+                        Total:
+                      </td>
+
+                      <td colspan="3" className="align-middle">
+                        {overallCheckin}
+                      </td>
+
+                      <td colspan="3" className="align-middle">
+                        {overallCheckout}
+                      </td>
+
+                      <td className="align-middle">{overallPayment}</td>
+                    </tr>
+                  </tfoot>
+                ) : null}
+              </table>
+            </div>
+          </Paper>
+        </Box>
+      </ThemeProvider>
+    );
+  }
+}
+
+const mapStateToProps = (state) => ({
+  userDetails: state.user,
+});
+
+export default connect(mapStateToProps)(withStyles(useStyles)(Home));

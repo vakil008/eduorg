@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 const PrivateLayout = () => {
   const loginTokenRes = useSelector((state) => state.user.loginToken);
+  // const loginTokenRes = true;
   console.log("loginTokenRes", loginTokenRes);
   return (
     <>

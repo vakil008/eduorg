@@ -1,9 +1,26 @@
+// export const appConfig = {
+//   mainDomain: "https://crmleadedu.herokuapp.com",
+// };
+
 export const appConfig = {
-  mainDomain: "https://crmleadedu.herokuapp.com",
+  mainDomain: "http://184.168.126.119",
 };
 export const middlePoints = "api";
 
+export const baseUrl = "http://184.168.126.119/";
+export const apiVersion = "1.0";
+export const apiType = "UAT";
+
 export const endPoints = {
+  LogInWeb: "FacilityAdmin/Admin/LogInWeb",
+  RefreshMappingWeb: "FacilityAdmin/Admin/RefreshMappingWeb",
+  GetAdminParkingStatusReportWeb:
+    "ReportAPI/Report/GetAdminParkingStatusReportWeb",
+  GetAdminMonthlyParkingStatusReportWeb:
+    "ReportAPI/Report/GetAdminMonthlyParkingStatusReportWeb",
+  GetAdminMISReport: "ReportAPI/Report/GetAdminMISReportWeb",
+  GetAdminMonthlyMISReport: "ReportAPI/Report/GetAdminMonthlyMISReportWeb",
+
   login: `${middlePoints}/identity/token`,
   register: `${middlePoints}/identity/register`,
   all_branches: `${middlePoints}/v1/Settings/GetAllBranch`,

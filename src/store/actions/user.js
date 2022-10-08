@@ -18,3 +18,8 @@ export const setUserToken = (param) => ({
   type: ActionTypes.SET_USER_TOKEN,
   payload: param,
 });
+
+export const setUserFacility = (param) => ({
+  type: ActionTypes.STORE_USER_FACILITY,
+  payload: param,
+});

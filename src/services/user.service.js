@@ -1,14 +1,106 @@
 import Api from "../utils/APICaller";
 import { endPoints, appConfig } from "../config";
-const singin = async (email, password) => {
+const singin = async (userid, password) => {
   try {
-    const { login } = endPoints;
+    const { LogInWeb } = endPoints;
     const method = "POST";
     let body = {
-      email,
+      userid,
       password,
     };
-    const res = await Api(login, false, method, body);
+    const res = await Api(LogInWeb, false, method, body);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const mapping = async (deviceuniqueid, token) => {
+  try {
+    const { RefreshMappingWeb } = endPoints;
+    const method = "POST";
+    let body = {
+      deviceuniqueid,
+      token,
+    };
+    const res = await Api(RefreshMappingWeb, false, method, body);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const AdminParkingStatusReport = async (facilityid, token, inputdatetime) => {
+  try {
+    const { GetAdminParkingStatusReportWeb } = endPoints;
+    const method = "POST";
+    let body = {
+      facilityid,
+      token,
+      inputdatetime,
+    };
+    const res = await Api(GetAdminParkingStatusReportWeb, false, method, body);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const AdminMonthlyParkingStatusReport = async (
+  facilityid,
+  token,
+  inputdatetime
+) => {
+  try {
+    const { GetAdminMonthlyParkingStatusReportWeb } = endPoints;
+    const method = "POST";
+    let body = {
+      facilityid,
+      token,
+      inputdatetime,
+    };
+    const res = await Api(
+      GetAdminMonthlyParkingStatusReportWeb,
+      false,
+      method,
+      body
+    );
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const AdminMISStatusReport = async (facilityid, token, inputdatetime) => {
+  try {
+    const { GetAdminMISReport } = endPoints;
+    const method = "POST";
+    let body = {
+      facilityid,
+      token,
+      inputdatetime,
+    };
+    const res = await Api(GetAdminMISReport, false, method, body);
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
+const AdminMonthlyMISStatusReport = async (
+  facilityid,
+  token,
+  inputmonthyear
+) => {
+  try {
+    const { GetAdminMonthlyMISReport } = endPoints;
+    const method = "POST";
+    let body = {
+      facilityid,
+      token,
+      inputmonthyear,
+    };
+    const res = await Api(GetAdminMonthlyMISReport, false, method, body);
     return res;
   } catch (error) {
     return error;
@@ -130,20 +222,26 @@ const SaveBranch = async (
   }
 };
 
-
-
 const SaveUser = async (
-   firstName,lastName, userName, email, password, confirmPassword,roles,branchId,
+  firstName,
+  lastName,
+  userName,
+  email,
+  password,
+  confirmPassword,
+  roles,
+  branchId
 ) => {
   const method = "POST";
   let body = {
     branchId,
-     firstName,
-     lastName, 
-     userName,
-      email,
-       password, 
-       confirmPassword,roles
+    firstName,
+    lastName,
+    userName,
+    email,
+    password,
+    confirmPassword,
+    roles,
   };
   try {
     const { register } = endPoints;
@@ -154,7 +252,6 @@ const SaveUser = async (
     return error;
   }
 };
-
 
 const GetAllUser = async () => {
   try {
@@ -177,11 +274,13 @@ const UserService = {
   GetAllLeadsStatus,
   GetAllLead,
   SaveBranch,
-<<<<<<< HEAD
   GetAllUniversity,
-=======
   SaveUser,
-  GetAllUser
->>>>>>> ca4fec06baf3a86efb78007e7666667a7a001d30
+  GetAllUser,
+  mapping,
+  AdminParkingStatusReport,
+  AdminMonthlyParkingStatusReport,
+  AdminMISStatusReport,
+  AdminMonthlyMISStatusReport,
 };
 export default UserService;
